@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 820" role="img" aria-label="Schematic hip X-ray illustration">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#1a1c22"/>
+      <stop offset="100%" stop-color="#0b0c10"/>
+    </radialGradient>
+    <linearGradient id="bone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f6f3ea"/>
+      <stop offset="55%" stop-color="#d9d4c4"/>
+      <stop offset="100%" stop-color="#a8a292"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="820" height="820" fill="url(#bg)"/>
+  <!-- Pelvis: two ilia and sacrum -->
+  <path d="M140 330 C 150 200, 300 150, 400 165 C 500 150, 650 200, 660 330
+           C 668 430, 640 480, 585 500 L 235 500 C 180 480, 152 430, 140 330 Z"
+        fill="url(#bone)" opacity="0.92" filter="url(#glow)"/>
+  <ellipse cx="400" cy="415" rx="85" ry="95" fill="#b7b0a0" opacity="0.9"/>
+  <!-- Acetabula -->
+  <circle cx="255" cy="450" r="62" fill="#8d877a"/>
+  <circle cx="545" cy="450" r="62" fill="#8d877a"/>
+  <!-- Femoral heads -->
+  <circle cx="255" cy="480" r="52" fill="url(#bone)"/>
+  <circle cx="545" cy="480" r="52" fill="url(#bone)"/>
+  <!-- Femoral necks and greater trochanters -->
+  <path d="M255 500 L 225 585" stroke="url(#bone)" stroke-width="46" stroke-linecap="round" fill="none"/>
+  <path d="M545 500 L 575 585" stroke="url(#bone)" stroke-width="46" stroke-linecap="round" fill="none"/>
+  <path d="M190 545 Q 210 585, 245 600" stroke="url(#bone)" stroke-width="30" stroke-linecap="round" fill="none"/>
+  <path d="M610 545 Q 590 585, 555 600" stroke="url(#bone)" stroke-width="30" stroke-linecap="round" fill="none"/>
+  <!-- Femoral shafts -->
+  <path d="M225 610 L 205 790" stroke="url(#bone)" stroke-width="52" stroke-linecap="round" fill="none"/>
+  <path d="M575 610 L 595 790" stroke="url(#bone)" stroke-width="52" stroke-linecap="round" fill="none"/>
+  <!-- Soft-tissue gradient overlay -->
+  <ellipse cx="400" cy="520" rx="360" ry="330" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="60"/>
+</svg>

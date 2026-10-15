@@ -22,7 +22,7 @@ export type OrganContent = {
   hotspots: Record<string, { label: string; detail: string }>;
 };
 
-export type OrganContentDictionary = Record<OrganId, OrganContent>;
+export type OrganContentDictionary = Record<string, OrganContent>;
 
 export type UiDictionary = {
   meta: { title: string; description: string; ogTitle: string; ogDescription: string; imageAlt: string };

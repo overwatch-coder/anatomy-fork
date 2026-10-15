@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import {
   ArrowRight,
   BookOpen,
   Bookmark,
   BrainCircuit,
+  Check,
   ChevronDown,
   CircleHelp,
   Compass,
@@ -17,6 +19,7 @@ import {
   Microscope,
   NotebookPen,
   Play,
+  RotateCcw,
   Search,
   Share2,
   Sparkles,
@@ -29,13 +32,17 @@ import type { LocaleConfig } from "../i18n/config";
 import { locales } from "../i18n/config";
 import { buildOrgans, indexOrgans, type Organ } from "../i18n/merge";
 import { format, type Dictionary, type UiDictionary } from "../i18n/types";
+import { quizBank } from "../lib/content/questions";
+import { lessons } from "../lib/content/lessons";
+import { histology } from "../lib/content/histology";
+import { functionAnimations } from "../lib/content/animations";
+import { progressStore, useProgress } from "../lib/progress";
 
-type Modal = "lesson" | "quiz" | "animation" | "system" | null;
+type Modal = "lesson" | "quiz" | "animation" | "system" | "inside" | "profile" | null;
 
 /**
  * Renders an organ illustration, or its accent glyph for organs that ship as a
- * 3D model without the painted asset set. Keeps every image slot filled instead
- * of leaving a broken `<img>` behind.
+ * 3D model without the painted asset set.
  */
 function OrganArt({
   organ,
@@ -49,8 +56,6 @@ function OrganArt({
   size?: number;
 }) {
   if (!organ.illustrated) {
-    // An empty alt means a surrounding control already names this, so the
-    // glyph should be skipped rather than announced with no label.
     const labelling = alt ? { role: "img", "aria-label": alt } : { "aria-hidden": true };
     return (
       <span className="art-fallback" style={{ "--art-accent": organ.accent } as React.CSSProperties} {...labelling}>
@@ -71,55 +76,17 @@ function OrganArt({
   );
 }
 
-
-/**
- * Measurements like "250–350 g" begin with a digit, which Unicode treats as
- * neutral — inside an RTL paragraph the range gets visually reversed. Digits
- * are not "strong" characters, so `unicode-bidi: plaintext` cannot rescue it;
- * the run has to be isolated as LTR explicitly.
- */
 function Measure({ children }: { children: string }) {
   return <bdi dir={/^[\d(]/.test(children.trim()) ? "ltr" : "auto"}>{children}</bdi>;
 }
 
-/**
- * Switches language by swapping the leading path segment, so the current
- * document is preserved rather than bouncing through the root redirect.
- *
- * The native <select> is stretched transparently over the whole pill rather
- * than sitting inline. A <label> only *focuses* a select when clicked — it does
- * not open it — so anything outside the select's own box (the globe, the
- * chevron, the padding) would otherwise be a dead zone. Overlaying it means a
- * click anywhere on the control opens the picker, while the visible row
- * underneath stays fully styleable.
- */
-function LanguageSwitcher({ locale, t }: { locale: LocaleConfig; t: UiDictionary }) {
-  return (
-    <div className="language-switcher" title={t.language.label}>
-      <Globe size={16} aria-hidden />
-      <span className="language-current">{locale.nativeName}</span>
-      <ChevronDown size={14} aria-hidden />
-      <select
-        aria-label={t.language.choose}
-        value={locale.code}
-        onChange={(event) => {
-          window.location.pathname = `/${event.target.value}`;
-        }}
-      >
-        {locales.map((entry) => (
-          <option key={entry.code} value={entry.code} lang={entry.code}>
-            {entry.nativeName}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dictionary: Dictionary }) {
   const t = dictionary.ui;
   const organs = useMemo(() => buildOrgans(dictionary.organs), [dictionary.organs]);
   const organById = useMemo(() => indexOrgans(organs), [organs]);
+  const progress = useProgress();
 
   const [organId, setOrganId] = useState<OrganId>("heart");
   const [autoRotate, setAutoRotate] = useState(true);
@@ -128,17 +95,37 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
   const [query, setQuery] = useState("");
   const [mobileLibrary, setMobileLibrary] = useState(false);
   const [quizActive, setQuizActive] = useState(false);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const prefetched = useRef(new Set<OrganId>());
-  const organ = organById[organId];
-  const reference = organById[organId === "heart" ? "brain" : "heart"];
-  const filteredOrgans = useMemo(
-    () =>
-      organs.filter((item) =>
-        `${item.name} ${item.system}`.toLocaleLowerCase(locale.code).includes(query.toLocaleLowerCase(locale.code)),
-      ),
-    [organs, query, locale.code],
-  );
+  const organ = organById[organId] ?? organs[0];
+  const reference = organById[organId === "heart" ? "brain" : "heart"] ?? organs[1];
+
+  // Pick up organ from URL query if navigated from systems or external links
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const paramOrgan = params.get("organ");
+    if (paramOrgan && paramOrgan in organById) {
+      setOrganId(paramOrgan as OrganId);
+    }
+    const modalParam = params.get("modal") as Modal;
+    if (modalParam) setModal(modalParam);
+  }, [organById]);
+
+  // Mark organ visited
+  useEffect(() => {
+    progressStore.markVisited(organId);
+  }, [organId]);
+
+  const filteredOrgans = useMemo(() => {
+    return organs.filter((item) => {
+      if (showSavedOnly && !progress.saved.includes(item.id)) return false;
+      if (!query.trim()) return true;
+      const haystack = `${item.name} ${item.system}`.toLocaleLowerCase(locale.code);
+      return haystack.includes(query.toLocaleLowerCase(locale.code));
+    });
+  }, [organs, query, locale.code, showSavedOnly, progress.saved]);
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -149,7 +136,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
   }, [organId]);
 
   const selectOrgan = (id: OrganId) => {
-    if (organById[id].illustrated) {
+    if (organById[id]?.illustrated) {
       ["organ", "microscopic", "compare", "location"].forEach((asset) => {
         const image = new Image();
         image.src = `/anatomy/${id}/${asset}.webp`;
@@ -161,10 +148,8 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
     setQuizActive(false);
   };
 
-  // Warms the model in the HTTP cache while the pointer is still travelling,
-  // so the switch usually renders without a visible loading pass.
   const prefetchOrgan = (id: OrganId) => {
-    if (id === organId || prefetched.current.has(id)) return;
+    if (id === organId || prefetched.current.has(id) || !organById[id]) return;
     prefetched.current.add(id);
     void fetch(organById[id].model, { priority: "low" } as RequestInit).catch(() => {});
   };
@@ -178,32 +163,49 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         </button>
         <nav className="main-nav" aria-label="Primary navigation">
           <button className="active"><Compass size={17} /> {t.nav.explore}</button>
-          <button><BrainCircuit size={17} /> {t.nav.systems}</button>
+          <Link href={`/${locale.code}/systems`} style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none", color: "inherit" }}>
+            <BrainCircuit size={17} /> {t.nav.systems}
+          </Link>
           <button onClick={() => setModal("lesson")}><BookOpen size={17} /> {t.nav.lessons}</button>
-          <button><LibraryBig size={17} /> {t.nav.library}</button>
-          <button><NotebookPen size={17} /> {t.nav.notes}</button>
+          <button onClick={() => setShowSavedOnly((s) => !s)} className={showSavedOnly ? "active" : ""}>
+            <LibraryBig size={17} /> {t.nav.library}
+          </button>
+          <button onClick={() => setModal("profile")}><NotebookPen size={17} /> {t.nav.notes}</button>
         </nav>
         <label className="search-box">
           <Search size={17} />
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search.placeholder} />
         </label>
         <LanguageSwitcher locale={locale} t={t} />
-        <button className="profile" aria-label={t.profile.open}><span>MA</span><ChevronDown size={15} /></button>
-        <button className="mobile-library-trigger" onClick={() => setMobileLibrary(true)} aria-label={t.library.open}><LibraryBig size={20} /></button>
+        <button className="profile" onClick={() => setModal("profile")} aria-label={t.profile.open}>
+          <span>MA</span><ChevronDown size={15} />
+        </button>
+        <button className="mobile-library-trigger" onClick={() => setMobileLibrary(true)} aria-label={t.library.open}>
+          <LibraryBig size={20} />
+        </button>
       </header>
 
       <div className="workspace">
         <aside className={`organ-library ${mobileLibrary ? "open" : ""}`}>
           <div className="panel-heading">
-            <span>{t.library.title}</span>
+            <span>{showSavedOnly ? t.library.saved : t.library.title}</span>
             <button aria-label={t.library.close} className="mobile-close" onClick={() => setMobileLibrary(false)}><X size={17} /></button>
-            <button aria-label={t.library.saved}><Bookmark size={17} /></button>
+            <button
+              aria-label={t.library.saved}
+              className={showSavedOnly ? "active" : ""}
+              onClick={() => setShowSavedOnly((s) => !s)}
+              title={showSavedOnly ? "Show all" : "Show saved"}
+            >
+              <Bookmark size={17} fill={showSavedOnly ? "currentColor" : "none"} />
+            </button>
           </div>
-          <div className="organ-list">
+          <div className="organ-list" role="radiogroup" aria-label={t.library.title}>
             {filteredOrgans.map((item) => (
               <button
                 type="button"
                 key={item.id}
+                role="radio"
+                aria-checked={organId === item.id}
                 className={`organ-item ${organId === item.id ? "active" : ""}`}
                 onClick={() => selectOrgan(item.id)}
                 onPointerEnter={() => prefetchOrgan(item.id)}
@@ -214,11 +216,15 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
                   <OrganArt organ={item} asset="thumb" alt="" size={47} />
                 </span>
                 <span><b>{item.name}</b><small>{item.system}</small></span>
-                {organId === item.id && <Heart className="favorite" size={14} fill="currentColor" />}
+                {organId === item.id && (
+                  <Check className="selected-mark" size={15} strokeWidth={2.6} aria-hidden />
+                )}
               </button>
             ))}
           </div>
-          <button className="view-all" onClick={() => setQuery("")}>{t.library.viewAll} <ArrowRight size={14} /></button>
+          <button className="view-all" onClick={() => { setQuery(""); setShowSavedOnly(false); }}>
+            {t.library.viewAll} <ArrowRight size={14} />
+          </button>
           <blockquote>
             <Sparkles size={18} />
             <p>{t.library.quoteLine1}<br />{t.library.quoteLine2}</p>
@@ -238,7 +244,17 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         />
 
         <aside className="info-panel" ref={contentRef}>
-          <div className="info-kicker" data-reveal><Heart size={13} fill="currentColor" /> {format(t.info.kicker, { organ: organ.name })}</div>
+          <div className="info-kicker" data-reveal>
+            <button
+              type="button"
+              onClick={() => progressStore.toggleSaved(organ.id)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", display: "inline-flex", alignItems: "center", gap: "4px" }}
+              title={progress.saved.includes(organ.id) ? "Remove bookmark" : "Bookmark organ"}
+            >
+              <Bookmark size={13} fill={progress.saved.includes(organ.id) ? "currentColor" : "none"} />
+            </button>
+            {format(t.info.kicker, { organ: organ.name })}
+          </div>
           <div className="info-title-row" data-reveal>
             <div><h1>{organ.name}</h1><em>{organ.poetic}</em></div>
             <span className="specimen-stamp">
@@ -284,7 +300,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         <article>
           <header><div><em>{t.cards.microscopic}</em><h3>{organ.tissue}</h3></div><Microscope size={17} /></header>
           <div className="microscope-visual organ-card-image"><OrganArt organ={organ} asset="microscopic" alt="" /></div>
-          <button onClick={() => setModal("lesson")}>{t.cards.exploreTissue} <ArrowRight size={14} /></button>
+          <button onClick={() => setModal("inside")}>{t.cards.exploreTissue} <ArrowRight size={14} /></button>
         </article>
         <article>
           <header><div><em>{t.cards.compareOrgans}</em><h3>{organ.comparison}</h3></div><Share2 size={17} /></header>
@@ -293,8 +309,6 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         </article>
         <article>
           <header><div><em>{t.cards.functionAnimation}</em><h3>{organ.function}</h3></div><Play size={17} /></header>
-          {/* The artwork itself is the control, so the play badge inside it is
-              decorative rather than a nested button. */}
           <button
             type="button"
             className="function-visual organ-card-image"
@@ -326,7 +340,16 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         </article>
       </section>
 
-      {modal && <LearningModal type={modal} organ={organ} t={t} onClose={() => setModal(null)} />}
+      {modal && (
+        <LearningModal
+          type={modal}
+          organ={organ}
+          locale={locale.code}
+          t={t}
+          onStartLabelQuiz={() => { setModal(null); setQuizActive(true); }}
+          onClose={() => setModal(null)}
+        />
+      )}
       {mobileLibrary && <button className="drawer-backdrop" aria-label={t.library.close} onClick={() => setMobileLibrary(false)} />}
     </main>
   );
@@ -337,32 +360,73 @@ const MODAL_ICON: Record<Exclude<Modal, null>, string> = {
   animation: "▶",
   system: "⌖",
   lesson: "✦",
+  inside: "🔬",
+  profile: "MA",
 };
 
 function LearningModal({
   type,
   organ,
+  locale,
   t,
+  onStartLabelQuiz,
   onClose,
 }: {
   type: Exclude<Modal, null>;
   organ: Organ;
+  locale: string;
   t: UiDictionary;
+  onStartLabelQuiz: () => void;
   onClose: () => void;
 }) {
   const vars = { organ: organ.name, location: organ.location };
+  const langKey = locale === "ru" ? "ru" : "en";
+  const progress = useProgress();
+
+  // Content data
+  const organQuestions = quizBank[organ.id] ?? [];
+  const organLesson = (lessons[organ.id] as any)?.[langKey] ?? lessons[organ.id]?.en;
+  const organHisto = (histology[organ.id] as any)?.[langKey] ?? histology[organ.id]?.en;
+  const organAnim = (functionAnimations[organ.id] as any)?.[langKey] ?? functionAnimations[organ.id]?.en;
+
+  // Quiz state
+  const [qIndex, setQIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+  const [quizFinished, setQuizFinished] = useState(false);
+
+  const currentQ = organQuestions[qIndex]?.[langKey as "en" | "ru"] ?? organQuestions[qIndex]?.en;
+
+  const handleSelectOption = (index: number) => {
+    if (selectedOption !== null || !currentQ) return;
+    setSelectedOption(index);
+    if (index === currentQ.correct) {
+      setScore((s) => s + 1);
+    }
+  };
+
+  const handleNextQ = () => {
+    if (qIndex + 1 < organQuestions.length) {
+      setQIndex((i) => i + 1);
+      setSelectedOption(null);
+    } else {
+      setQuizFinished(true);
+      progressStore.recordQuiz(organ.id, score + (selectedOption === currentQ?.correct ? 1 : 0), organQuestions.length);
+    }
+  };
+
   const title =
-    type === "quiz" ? format(t.modal.quizTitle, vars)
+    type === "quiz" ? `${organ.name} Theory Quiz`
+    : type === "lesson" ? `Anatomical Lesson: ${organ.name}`
     : type === "animation" ? format(t.modal.motionTitle, vars)
-    // Avoids gluing onto `system`, whose wording varies per organ, and stays
-    // grammatical for the plural organs too.
     : type === "system" ? format(t.modal.bodyTitle, vars)
+    : type === "profile" ? "Learner Profile & Progress"
     : format(t.modal.insideTitle, vars);
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <section
-        className={`learning-modal ${type === "system" ? "wide" : ""}`}
+        className={`learning-modal ${type === "system" || type === "lesson" || type === "quiz" ? "wide" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
@@ -372,18 +436,151 @@ function LearningModal({
         <span className="modal-icon">{MODAL_ICON[type]}</span>
         <em>{t.modal.guided}</em>
         <h2 id="modal-title">{title}</h2>
+
         {type === "quiz" ? (
-          <div className="quiz-options">
-            <p>{format(t.modal.quizPrompt, vars)}</p>
-            <button onClick={onClose}>{t.modal.quizA}</button>
-            <button onClick={onClose}>{t.modal.quizB}</button>
-            <button onClick={onClose}>{t.modal.quizC}</button>
+          <div className="quiz-container" style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
+            {!quizFinished && currentQ ? (
+              <>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem", color: "var(--muted)" }}>
+                  <span>Question {qIndex + 1} of {organQuestions.length}</span>
+                  <span>Score: {score}</span>
+                </div>
+                <p style={{ fontWeight: 600, fontSize: "1.1rem", marginBottom: "1rem" }}>{currentQ.prompt}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {currentQ.options.map((option, i) => {
+                    const isPicked = selectedOption === i;
+                    const isCorrect = i === currentQ.correct;
+                    let bg = "rgba(0,0,0,0.03)";
+                    let border = "1px solid var(--line)";
+                    if (selectedOption !== null) {
+                      if (isCorrect) {
+                        bg = "rgba(92,158,107,0.18)";
+                        border = "1px solid #5c9e6b";
+                      } else if (isPicked) {
+                        bg = "rgba(209,88,79,0.18)";
+                        border = "1px solid #d1584f";
+                      }
+                    }
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSelectOption(i)}
+                        style={{
+                          textAlign: "left",
+                          padding: "10px 14px",
+                          borderRadius: "8px",
+                          border,
+                          background: bg,
+                          cursor: selectedOption === null ? "pointer" : "default",
+                        }}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedOption !== null && (
+                  <div style={{ marginTop: "1rem", padding: "12px", background: "rgba(0,0,0,0.02)", borderRadius: "8px", borderLeft: "3px solid var(--coral)" }}>
+                    <p style={{ margin: 0, fontSize: "0.95rem" }}><b>Explanation:</b> {currentQ.explanation}</p>
+                    <button
+                      type="button"
+                      className="lesson-button"
+                      onClick={handleNextQ}
+                      style={{ marginTop: "10px" }}
+                    >
+                      {qIndex + 1 < organQuestions.length ? "Next Question" : "Finish Quiz"} <ArrowRight size={15} />
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
+                <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>Quiz Complete!</p>
+                <p style={{ fontSize: "1.1rem", margin: "10px 0" }}>You scored {score} out of {organQuestions.length}</p>
+                <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "1rem" }}>
+                  <button
+                    type="button"
+                    className="lesson-button"
+                    onClick={() => { setQIndex(0); setSelectedOption(null); setScore(0); setQuizFinished(false); }}
+                  >
+                    Retry Theory Quiz
+                  </button>
+                  <button
+                    type="button"
+                    className="lesson-button"
+                    onClick={onStartLabelQuiz}
+                    style={{ background: "var(--coral)", color: "#fff" }}
+                  >
+                    Take 3D Labelling Quiz
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : type === "lesson" && organLesson ? (
+          <div className="lesson-container" style={{ textAlign: "left", width: "100%", maxHeight: "65vh", overflowY: "auto", paddingRight: "8px" }}>
+            <h3 style={{ marginTop: "0.5rem" }}>Learning Objectives</h3>
+            <ul>
+              {organLesson.objectives.map((obj: string, i: number) => (
+                <li key={i} style={{ margin: "4px 0" }}>{obj}</li>
+              ))}
+            </ul>
+            <h3 style={{ marginTop: "1rem" }}>Anatomical Structure</h3>
+            <p style={{ lineHeight: 1.6 }}>{organLesson.structure}</p>
+            <h3 style={{ marginTop: "1rem" }}>Physiological Function</h3>
+            <p style={{ lineHeight: 1.6 }}>{organLesson.function}</p>
+            <h3 style={{ marginTop: "1rem" }}>Clinical Correlates</h3>
+            <ul>
+              {organLesson.clinical.map((clin: string, i: number) => (
+                <li key={i} style={{ margin: "4px 0" }}>{clin}</li>
+              ))}
+            </ul>
+            <h3 style={{ marginTop: "1rem" }}>Literature & Canonical References</h3>
+            <ul>
+              {organLesson.sources.map((src: string, i: number) => (
+                <li key={i} style={{ margin: "4px 0", fontSize: "0.88rem", color: "var(--muted)" }}>{src}</li>
+              ))}
+            </ul>
+          </div>
+        ) : type === "inside" && organHisto ? (
+          <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
+            <p><b>Tissue Type:</b> {organ.tissue}</p>
+            <p style={{ lineHeight: 1.6 }}>{organHisto.stain} — {organHisto.features}</p>
+            <h3 style={{ marginTop: "1rem" }}>Histological Layers</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {organHisto.layers.map((l: { name: string; description: string }, i: number) => (
+                <div key={i} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.03)", borderRadius: "8px" }}>
+                  <b>{l.name}:</b> <span>{l.description}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : type === "animation" && organAnim ? (
+          <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
+            <h3 style={{ marginTop: "0.5rem" }}>{organAnim.label}</h3>
+            <p style={{ lineHeight: 1.6 }}>{organAnim.description}</p>
+            <p style={{ marginTop: "1rem", fontStyle: "italic", color: "var(--muted)" }}>
+              {organAnim.clinical}
+            </p>
+          </div>
+        ) : type === "profile" ? (
+          <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
+            <p><b>Organs Visited:</b> {Object.keys(progress.visited).length} / 30</p>
+            <p><b>Saved Bookmarks:</b> {progress.saved.length}</p>
+            <p><b>Quizzes Taken:</b> {Object.keys(progress.quiz).length}</p>
+            <button
+              type="button"
+              className="lesson-button"
+              onClick={() => progressStore.reset()}
+              style={{ marginTop: "1rem" }}
+            >
+              Reset Progress
+            </button>
           </div>
         ) : type === "system" ? (
           <>
             <p>{format(t.modal.systemIntro, vars)}</p>
-            {/* Shown whole rather than cropped into the circular demo — the
-                point of this view is the figure and its vessels. */}
             <figure className="modal-figure">
               <OrganArt organ={organ} asset="location" alt="" />
             </figure>
@@ -392,7 +589,9 @@ function LearningModal({
               <div><dt>{t.modal.primaryRole}</dt><dd><Measure>{organ.function}</Measure></dd></div>
               <div><dt>{t.modal.bloodSupply}</dt><dd><Measure>{organ.bloodSupply}</Measure></dd></div>
             </dl>
-            <button className="lesson-button" onClick={onClose}>{t.modal.continueExploring} <ArrowRight size={16} /></button>
+            <Link className="lesson-button" href={`/${locale}/systems`} style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none", color: "inherit", marginTop: "10px" }}>
+              Open Interactive Systems Map <ArrowRight size={16} />
+            </Link>
           </>
         ) : (
           <>

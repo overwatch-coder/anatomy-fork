@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import gsap from "gsap";
 import type { Hotspot } from "../../i18n/merge";
-import { AnatomyAssetManager, type LoadedOrgan } from "./loaders";
+import { AnatomyAssetManager, FIT_SIZE, type LoadedOrgan } from "./loaders";
 import { HotspotLayer } from "./hotspots";
 
 type ViewerCallbacks = {
@@ -14,14 +14,38 @@ type ViewerCallbacks = {
   onAuthorPoint?: (point: { x: number; y: number; z: number }) => void;
 };
 
+/** Which way the cutting plane faces, in the organ's own space. */
+export type SectionAxis = "sagittal" | "coronal" | "axial" | "free";
+
 const DOT_PIXELS = 34;
 const CAMERA_FOV = 34;
 const DEPTH_PREPASS = "depth-prepass";
-const PLINTH_Y = -2.5;
-const PLINTH_TOP = PLINTH_Y + 0.17;
-/** Slightly above eye level, so the plinth reads as a disc the organ sits on
- *  rather than an edge-on band across the background. */
-const HOME_CAMERA = { x: 0, y: 1.05, z: 8.2 };
+/**
+ * Anatomical planes, as normals in organ space. Each points along the
+ * direction the discarded half lies in, so the default cut opens towards a
+ * viewer at the home camera rather than presenting its intact back.
+ */
+const SECTION_NORMALS: Record<Exclude<SectionAxis, "free">, [number, number, number]> = {
+  sagittal: [-1, 0, 0],
+  coronal: [0, 0, -1],
+  axial: [0, -1, 0],
+};
+/** Depth at which the specimen is still whole — one end of the slider. */
+const SECTION_OPEN = -1;
+/**
+ * How much of the specimen's half-extent the slider actually spans. Held under
+ * 1 so the ends of the travel still leave anatomy on screen instead of an empty
+ * frame that reads as a broken tool.
+ */
+const SECTION_TRAVEL = 0.92;
+/** Gap between the underside of the specimen and its contact shadow. */
+const SHADOW_DROP = 0.16;
+const SHADOW_OPACITY = 0.62;
+/** Studio dressing level while Isolate is on: present, but out of the way. */
+const ISOLATED_DRESSING = 0.12;
+/** The specimen floats free, so the camera sits nearly level with it — there is
+ *  no longer a plinth that needs to read as a disc rather than an edge-on band. */
+const HOME_CAMERA = { x: 0, y: 0.3, z: 8.2 };
 const HOME_TARGET = { x: 0, y: 0.02, z: 0 };
 
 export class AnatomyViewer {
@@ -34,20 +58,79 @@ export class AnatomyViewer {
   private callbacks: ViewerCallbacks;
   private container: HTMLElement;
   private organ: LoadedOrgan | null = null;
-  private plinth!: THREE.Mesh;
   private contactShadow!: THREE.Mesh;
+  private particles!: THREE.Points;
+  private glow!: THREE.PointLight;
 
   private frame = 0;
   private clock = new THREE.Clock();
   private resizeObserver: ResizeObserver;
   private intersectionObserver: IntersectionObserver;
-  private clipPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
-  /** Writes depth only — used to resolve a fading organ to one surface. */
-  private depthMaterial = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true, depthTest: true });
+  /**
+   * The cut, held in the organ's own space — which is what makes "sagittal"
+   * mean sagittal. `clipPlane` is this plane pushed out to world space, because
+   * that is the only space three.js will clip in.
+   */
+  private localPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+  private clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+  private sectionAxis: SectionAxis = "free";
+  /** Where the user has parked the plane, -1 (whole) to 1 (fully cut away). */
+  private sectionDepth = 0;
+  private sectionFlip = false;
+  /** What is actually on screen — sweeps to `sectionDepth` when the tool opens. */
+  private sweep = { depth: SECTION_OPEN };
+  /** Camera direction captured in organ space when "free" is chosen. */
+  private freeNormal = new THREE.Vector3(0, 0, -1);
+  /**
+   * A ghost of the cutting plane — a tinted pane with an outlined rim — so the
+   * cut reads as a tool with an orientation rather than a mystery bite. Held in
+   * organ space via `helperPose` and pushed to world alongside the clip plane.
+   */
+  private sectionHelper!: THREE.Group;
+  private sectionHelperFill!: THREE.MeshBasicMaterial;
+  private sectionHelperRim!: THREE.LineBasicMaterial;
+  /** Whether the user wants the plane drawn while the tool is open. */
+  private sectionPlaneShown = true;
+  private readonly helperPose = new THREE.Matrix4();
+  private readonly helperPosition = new THREE.Vector3();
+  private readonly helperQuaternion = new THREE.Quaternion();
+  private readonly helperScale = new THREE.Vector3();
+  private static readonly PLANE_FORWARD = new THREE.Vector3(0, 0, 1);
+  private readonly boundsCenter = new THREE.Vector3();
+  private readonly boundsHalf = new THREE.Vector3();
+  private readonly planeNormal = new THREE.Vector3();
+  /**
+   * Writes depth only — used to resolve a fading organ to one surface.
+   * Double-sided so that a cut organ still lays down depth for the interior
+   * surfaces its clipped-away front faces would otherwise have covered.
+   */
+  private depthMaterial = new THREE.MeshBasicMaterial({
+    colorWrite: false,
+    depthWrite: true,
+    depthTest: true,
+    side: THREE.DoubleSide,
+  });
   private crossSection = false;
   private isolated = false;
+  private wireframe = false;
+
+  /** Y of the contact shadow plane, re-derived from each organ's footprint. */
+  private shadowY = -2.1;
+  /** Facing fade of the shadow, 0 once the camera drops to its plane. */
+  private shadowFade = 1;
+  /** Studio dressing level: 1 normally, near-0 while Isolate is on. */
+  private dressing = { value: 1 };
 
   private width = 1;
+  private quizMode = false;
+  private authoring = false;
+  private authorRaycaster = new THREE.Raycaster();
+
+  /** Procedural function animation (heartbeat, breathing, peristalsis…). */
+  private functionAnimation = false;
+  private animationTime = 0;
+  private animationKey: string | null = null;
+
   private height = 1;
   private isVisible = true;
   private isPageVisible = true;
@@ -70,9 +153,6 @@ export class AnatomyViewer {
   private calloutEl: HTMLElement | null = null;
   private fadeTween: gsap.core.Tween | null = null;
   private disposed = false;
-  private quizMode = false;
-  private authoring = false;
-  private authorRaycaster = new THREE.Raycaster();
 
   constructor(container: HTMLElement, callbacks: ViewerCallbacks) {
     this.container = container;
@@ -101,8 +181,10 @@ export class AnatomyViewer {
     // shadow gives the same read for free.
     this.renderer.shadowMap.enabled = false;
     this.renderer.localClippingEnabled = true;
-    // Localised by the React layer via setCanvasLabel once the dictionary is known.
-    this.renderer.domElement.setAttribute("aria-label", "Interactive 3D anatomy model");
+    this.renderer.domElement.setAttribute(
+      "aria-label",
+      "Interactive 3D anatomy model. Drag to rotate, scroll to zoom, and click a dot to read about that structure.",
+    );
     this.renderer.domElement.tabIndex = 0;
     container.appendChild(this.renderer.domElement);
 
@@ -119,6 +201,7 @@ export class AnatomyViewer {
 
     this.assets = new AnatomyAssetManager(this.renderer);
     this.buildEnvironment();
+    this.buildSectionHelper();
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(container);
@@ -162,32 +245,29 @@ export class AnatomyViewer {
     const warm = new THREE.PointLight(0xff8d70, 0.72, 11, 2);
     warm.position.set(-3, -1.4, 3.5);
     this.scene.add(warm);
-    const glow = new THREE.PointLight(0xee7c6a, 0.5, 8, 2);
-    glow.name = "organ-glow";
-    glow.position.set(2.8, 0.4, 2.8);
-    this.scene.add(glow);
+    this.glow = new THREE.PointLight(0xee7c6a, 0.5, 8, 2);
+    this.glow.name = "organ-glow";
+    this.glow.position.set(2.8, 0.4, 2.8);
+    this.scene.add(this.glow);
 
     this.scene.environment = this.buildEnvironmentMap();
 
-    this.plinth = new THREE.Mesh(
-      new THREE.CylinderGeometry(2.3, 2.48, 0.34, 56),
-      new THREE.MeshStandardMaterial({ color: 0xead7c1, roughness: 0.78, metalness: 0 }),
-    );
-    this.plinth.position.y = PLINTH_Y;
-    this.scene.add(this.plinth);
-
+    // The specimen floats: a solid plinth used to sit here, and it walled off
+    // the underside of every organ from a full 360° orbit. What is left is a
+    // soft shadow disc that grounds the organ from ordinary viewing angles and
+    // fades out before the camera can pass through it.
     this.contactShadow = new THREE.Mesh(
       new THREE.PlaneGeometry(4.2, 4.2),
       new THREE.MeshBasicMaterial({
         map: contactShadowTexture(),
         transparent: true,
         depthWrite: false,
-        opacity: 0.62,
+        opacity: SHADOW_OPACITY,
         toneMapped: false,
       }),
     );
     this.contactShadow.rotation.x = -Math.PI / 2;
-    this.contactShadow.position.y = PLINTH_TOP + 0.005;
+    this.contactShadow.position.y = this.shadowY;
     this.contactShadow.renderOrder = 1;
     this.scene.add(this.contactShadow);
 
@@ -199,12 +279,11 @@ export class AnatomyViewer {
     }
     const particleGeometry = new THREE.BufferGeometry();
     particleGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    this.scene.add(
-      new THREE.Points(
-        particleGeometry,
-        new THREE.PointsMaterial({ color: 0xe7a18e, size: 0.013, transparent: true, opacity: 0.16 }),
-      ),
+    this.particles = new THREE.Points(
+      particleGeometry,
+      new THREE.PointsMaterial({ color: 0xe7a18e, size: 0.013, transparent: true, opacity: 0.16 }),
     );
+    this.scene.add(this.particles);
   }
 
   /** A tiny warm-to-cool gradient probe: better material response than a bare
@@ -238,13 +317,47 @@ export class AnatomyViewer {
     return environment;
   }
 
+  /**
+   * A unit quad, posed and scaled per organ by `helperPose`. The fill is nearly
+   * transparent so the anatomy behind it stays legible; the rim carries the
+   * orientation. Neither material clips, so the pane spans the whole cut even
+   * where the specimen has been carved away.
+   */
+  private buildSectionHelper() {
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    this.sectionHelperFill = new THREE.MeshBasicMaterial({
+      color: 0xee7c6a,
+      transparent: true,
+      opacity: 0.12,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    this.sectionHelperRim = new THREE.LineBasicMaterial({
+      color: 0xee7c6a,
+      transparent: true,
+      opacity: 0.55,
+      toneMapped: false,
+    });
+    this.sectionHelper = new THREE.Group();
+    this.sectionHelper.add(new THREE.Mesh(geometry, this.sectionHelperFill));
+    this.sectionHelper.add(new THREE.LineSegments(new THREE.EdgesGeometry(geometry), this.sectionHelperRim));
+    // Posed straight from the organ's world matrix — local maths stays local.
+    this.sectionHelper.matrixAutoUpdate = false;
+    this.sectionHelper.visible = false;
+    this.sectionHelper.renderOrder = 2;
+    this.scene.add(this.sectionHelper);
+  }
+
   // ---------------------------------------------------------------- organs
 
   prefetch(url: string) {
     this.assets.prefetch(url);
   }
 
-  async setOrgan(modelUrl: string, hotspots: Hotspot[], accent: string) {
+  async setOrgan(modelUrl: string, hotspots: Hotspot[], accent: string, animationKey: string | null = null) {
+    this.animationKey = animationKey;
+    this.animationTime = 0;
     const request = ++this.loadRequest;
     this.select(null);
     this.callbacks.onLoading(true, 0);
@@ -257,6 +370,10 @@ export class AnatomyViewer {
       this.fadeTween = null;
       this.setDepthPrepass(outgoing, false);
       this.hotspots.clear();
+    this.quizMode = false;
+    this.authoring = false;
+    this.hotspots.clearFlash();
+    this.setFunctionAnimation(false);
       this.busy(0.8);
       await gsap.to(outgoing.pivot.scale, {
         x: 0.72, y: 0.72, z: 0.72,
@@ -266,6 +383,8 @@ export class AnatomyViewer {
       });
       this.assets.release(outgoing);
       this.organ = null;
+      // Nothing left to cut — the pane comes back with the next organ's clip.
+      this.sectionHelper.visible = false;
       this.dirty = true;
     }
 
@@ -288,13 +407,24 @@ export class AnatomyViewer {
     this.scene.add(organ.pivot);
     organ.pivot.updateWorldMatrix(true, true);
 
+    // Measured before the dots are parented in, so their billboards cannot
+    // inflate the box the shadow is placed against.
+    this.anchorContactShadow(organ);
+
     // Anchor the dots while the organ is still invisible, then play the intro.
     this.hotspots.attach(organ.pivot, hotspots, organ.meshes);
     this.hotspots.setPixelSize(DOT_PIXELS, this.height, CAMERA_FOV);
-    if (this.crossSection) this.applyClipping(true);
+    // Tools are viewer state, not organ state — carry them onto the new organ.
+    // The plane is re-derived because travel is measured per organ.
+    if (this.crossSection) {
+      this.updateSectionPlane();
+      this.applyClipping(true);
+    }
+    if (this.wireframe) this.applyWireframe();
 
-    const glow = this.scene.getObjectByName("organ-glow") as THREE.PointLight | undefined;
-    glow?.color.set(accent);
+    this.glow.color.set(accent);
+    this.sectionHelperFill.color.set(accent);
+    this.sectionHelperRim.color.set(accent);
 
     organ.pivot.scale.setScalar(0.58);
     organ.pivot.position.z = -1.3;
@@ -308,6 +438,43 @@ export class AnatomyViewer {
       .to(organ.pivot.scale, { x: 1, y: 1, z: 1, duration: 0.9, ease: "back.out(1.25)" }, 0)
       .to(organ.pivot.position, { z: 0, duration: 0.85, ease: "power3.out" }, 0)
       .to(this.camera.position, { z: 8.2, duration: 0.9, ease: "power2.out" }, 0.08);
+  }
+
+  /**
+   * Drops the shadow just under the specimen. Organs are normalised into a
+   * FIT_SIZE cube by their longest axis, so a flat organ like the skin sits far
+   * shallower than the eyeball — a fixed height would leave its shadow adrift.
+   * Measured at full scale, before the intro animation shrinks the pivot.
+   */
+  private anchorContactShadow(organ: LoadedOrgan) {
+    const bounds = new THREE.Box3().setFromObject(organ.pivot);
+    if (bounds.isEmpty()) return;
+    this.shadowY = bounds.min.y - SHADOW_DROP;
+    this.contactShadow.position.y = this.shadowY;
+    this.dirty = true;
+  }
+
+  /**
+   * Fades the shadow out as the camera drops towards its plane. Without this,
+   * orbiting under the organ — the whole point of removing the plinth — would
+   * put a dark disc between the viewer and the specimen.
+   */
+  private updateContactShadow() {
+    const fade = THREE.MathUtils.smoothstep(this.camera.position.y - this.shadowY, 0.25, 1.7);
+    if (Math.abs(fade - this.shadowFade) < 0.002) return false;
+    this.shadowFade = fade;
+    this.applyDressing();
+    return true;
+  }
+
+  /** Applies the Isolate level (and the shadow's facing fade) to everything in
+   *  the scene that is staging rather than specimen. */
+  private applyDressing() {
+    const shadow = this.contactShadow.material as THREE.MeshBasicMaterial;
+    shadow.opacity = SHADOW_OPACITY * this.shadowFade * this.dressing.value;
+    this.contactShadow.visible = shadow.opacity > 0.004;
+    (this.particles.material as THREE.PointsMaterial).opacity = 0.16 * this.dressing.value;
+    this.glow.intensity = 0.5 * this.dressing.value;
   }
 
   private materials(organ: LoadedOrgan) {
@@ -392,14 +559,20 @@ export class AnatomyViewer {
 
     this.applyAutoRotate(now);
     if (this.controls.update(delta)) this.dirty = true;
+    if (this.updateContactShadow()) this.dirty = true;
+    // The pivot moves under the intro and reset tweens, and the cut is anchored
+    // to the organ rather than the world, so the world plane is re-derived.
+    if (this.crossSection) this.syncWorldPlane();
     if (this.assets.hasAnimation) {
       this.assets.update(delta);
       this.dirty = true;
     }
+    if (this.functionAnimation) this.applyFunctionAnimation(delta);
     if (this.hoverProbe) this.resolveHover();
     if (!this.dirty && now >= this.busyUntil) return;
 
-    if (!this.hotspots.update(this.camera, delta, this.selectedId, this.hoveredId)) this.dirty = true;
+    const clip = this.crossSection ? this.localPlane : null;
+    if (!this.hotspots.update(this.camera, delta, this.selectedId, this.hoveredId, clip)) this.dirty = true;
     else this.dirty = false;
     if (now < this.busyUntil) this.dirty = true;
 
@@ -418,6 +591,9 @@ export class AnatomyViewer {
   }
 
   private applyAutoRotate(now: number) {
+    // Opening a cut turns rotation off through the normal control rather than
+    // overriding it here, so the toggle never claims to be on while nothing
+    // moves — and someone who does want to turn a sectioned specimen can.
     this.controls.autoRotate = this.autoRotateWanted && !this.selectedId && now >= this.interactionUntil;
   }
 
@@ -466,7 +642,6 @@ export class AnatomyViewer {
     this.pointerId = null;
     this.dragged = false;
     if (wasDragging) return;
-
     // Authoring takes precedence: it wants a point on the mesh, not a marker.
     if (this.authoring) {
       this.captureAuthorPoint(event.offsetX, event.offsetY);
@@ -481,52 +656,6 @@ export class AnatomyViewer {
     }
     this.select(marker && marker.hotspot.id !== this.selectedId ? marker.hotspot.id : null);
   };
-
-  /**
-   * Raycasts the actual mesh and reports the hit in pivot space — the same
-   * coordinate system `anatomy-data.ts` authors hotspots in. Only ever runs on
-   * a deliberate click in authoring mode, so its cost never touches the
-   * interactive path.
-   */
-  private captureAuthorPoint(px: number, py: number) {
-    if (!this.organ) return;
-    const ndc = new THREE.Vector2((px / this.width) * 2 - 1, -(py / this.height) * 2 + 1);
-    this.authorRaycaster.setFromCamera(ndc, this.camera);
-    const hit = this.authorRaycaster.intersectObjects(this.organ.meshes, false)[0];
-    if (!hit) return;
-    const local = this.organ.pivot.worldToLocal(hit.point.clone());
-    this.callbacks.onAuthorPoint?.({
-      x: +local.x.toFixed(2),
-      y: +local.y.toFixed(2),
-      z: +local.z.toFixed(2),
-    });
-  }
-
-  /** Where a dot currently sits, as a 0–1 fraction of the viewport height.
-   *  Lets the UI place feedback away from the structure it is pointing at. */
-  hotspotScreenY(id: string): number | null {
-    const point = this.hotspots.screenPosition(id, this.camera, this.width, this.height);
-    return point ? point.y / this.height : null;
-  }
-
-  setQuizMode(enabled: boolean) {
-    this.quizMode = enabled;
-    this.select(null);
-    this.hotspots.clearFlash();
-    this.dirty = true;
-  }
-
-  setAuthoring(enabled: boolean) {
-    this.authoring = enabled;
-    this.renderer.domElement.style.cursor = enabled ? "crosshair" : "";
-    this.dirty = true;
-  }
-
-  /** Green/red ring on a dot after a quiz answer. */
-  flash(id: string, correct: boolean) {
-    this.hotspots.flash(id, correct);
-    this.busy(1.1);
-  }
 
   private onPointerLeave = () => {
     this.pointerId = null;
@@ -590,18 +719,23 @@ export class AnatomyViewer {
 
   // ---------------------------------------------------------------- tools
 
-  setCanvasLabel(label: string) {
-    this.renderer.domElement.setAttribute("aria-label", label);
-  }
-
   setAutoRotate(enabled: boolean) {
     this.autoRotateWanted = enabled;
     if (enabled) this.interactionUntil = 0;
     this.dirty = true;
   }
 
+  /** Returns the viewer to its home framing *and* clears every tool, so the
+   *  toolbar can never disagree with what is on screen. */
   reset() {
     this.select(null);
+    this.setIsolate(false);
+    this.setCrossSection(false);
+    this.setWireframe(false);
+    this.sectionAxis = "free";
+    this.sectionDepth = 0;
+    this.sectionFlip = false;
+    this.sectionPlaneShown = true;
     this.tween(this.camera.position, { ...HOME_CAMERA, duration: 0.8, ease: "power3.out" });
     this.tween(this.controls.target, { ...HOME_TARGET, duration: 0.8, ease: "power3.out" });
     if (this.organ) this.tween(this.organ.pivot.rotation, { x: 0.05, y: -0.28, z: 0, duration: 0.8, ease: "power3.out" });
@@ -616,52 +750,345 @@ export class AnatomyViewer {
   }
 
   toggleIsolate() {
-    this.isolated = !this.isolated;
-    const plinth = this.plinth.material as THREE.MeshStandardMaterial;
-    plinth.transparent = true;
-    this.tween(plinth, { opacity: this.isolated ? 0.15 : 1, duration: 0.45 });
-    this.tween(this.contactShadow.material, { opacity: this.isolated ? 0.08 : 0.55, duration: 0.45 });
+    return this.setIsolate(!this.isolated);
+  }
+
+  /** Isolate strips the staging — shadow, drifting particles, accent glow —
+   *  down to almost nothing, leaving the specimen alone in the frame. */
+  setIsolate(enabled: boolean) {
+    if (this.isolated === enabled) return this.isolated;
+    this.isolated = enabled;
+    gsap.killTweensOf(this.dressing);
+    this.busy(0.5);
+    gsap.to(this.dressing, {
+      value: enabled ? ISOLATED_DRESSING : 1,
+      duration: 0.45,
+      ease: "power2.out",
+      onUpdate: () => {
+        this.applyDressing();
+        this.dirty = true;
+      },
+    });
     return this.isolated;
   }
 
   toggleCrossSection() {
-    this.crossSection = !this.crossSection;
-    this.applyClipping(this.crossSection);
-    gsap.fromTo(
-      this.clipPlane,
-      { constant: -1.8 },
-      {
-        constant: this.crossSection ? 0 : -1.8,
-        duration: 0.85,
-        ease: "power2.inOut",
-        onUpdate: () => (this.dirty = true),
+    return this.setCrossSection(!this.crossSection);
+  }
+
+  /**
+   * Sweeps the cutting plane through the specimen. Enabling starts from whole
+   * and wipes in to wherever the depth control is parked; disabling wipes back
+   * out and only then drops the planes, so the organ never snaps back together.
+   */
+  setCrossSection(enabled: boolean) {
+    if (this.crossSection === enabled) return this.crossSection;
+    this.crossSection = enabled;
+    gsap.killTweensOf(this.sweep);
+    if (enabled) {
+      if (this.sectionAxis === "free") this.captureFreeNormal();
+      this.sweep.depth = SECTION_OPEN;
+      this.updateSectionPlane();
+      this.applyClipping(true);
+    }
+    gsap.to(this.sweep, {
+      depth: enabled ? this.sectionDepth : SECTION_OPEN,
+      duration: 0.85,
+      ease: "power2.inOut",
+      onUpdate: () => this.updateSectionPlane(),
+      onComplete: () => {
+        if (!this.crossSection) this.applyClipping(false);
+        this.dirty = true;
       },
-    );
+    });
     this.busy(0.95);
     return this.crossSection;
   }
 
+  /** Sagittal, coronal, axial — or a plane square to how you are looking now. */
+  setSectionAxis(axis: SectionAxis) {
+    if (this.sectionAxis === axis && axis !== "free") return;
+    this.sectionAxis = axis;
+    if (axis === "free") this.captureFreeNormal();
+    this.updateSectionPlane();
+    this.busy(0.2);
+  }
+
+  /** -1 leaves the specimen whole, 0 halves it, 1 takes almost all of it. */
+  setSectionDepth(depth: number) {
+    this.sectionDepth = THREE.MathUtils.clamp(depth, -1, 1);
+    if (!this.crossSection) return;
+    // Direct, not tweened: a slider that lags behind the thumb feels broken.
+    gsap.killTweensOf(this.sweep);
+    this.sweep.depth = this.sectionDepth;
+    this.updateSectionPlane();
+  }
+
+  /** Shows or hides the ghost of the cutting plane itself. */
+  setSectionPlaneVisible(shown: boolean) {
+    this.sectionPlaneShown = shown;
+    this.sectionHelper.visible = shown && this.crossSection && !!this.organ;
+    this.dirty = true;
+    return this.sectionPlaneShown;
+  }
+
+  /** Swaps which half is discarded, so both faces are reachable without orbiting. */
+  toggleSectionFlip() {
+    this.sectionFlip = !this.sectionFlip;
+    this.updateSectionPlane();
+    this.busy(0.2);
+    return this.sectionFlip;
+  }
+
+  private sectionNormal() {
+    if (this.sectionAxis === "free") this.planeNormal.copy(this.freeNormal);
+    else this.planeNormal.fromArray(SECTION_NORMALS[this.sectionAxis]);
+    return this.sectionFlip ? this.planeNormal.negate() : this.planeNormal;
+  }
+
+  /**
+   * Rebuilds the organ-space plane from the current axis, flip and sweep, then
+   * pushes it out to world space. Travel is measured against this organ's own
+   * box projected onto the plane normal, so the same slider position means
+   * "halfway through" whether the specimen is an eyeball or a set of lungs —
+   * and every position lands inside the specimen rather than sailing past it.
+   */
+  private updateSectionPlane() {
+    const normal = this.sectionNormal();
+    const bounds = this.organ?.bounds;
+    let mid = 0;
+    let radius = FIT_SIZE / 2;
+    if (bounds && !bounds.isEmpty()) {
+      bounds.getCenter(this.boundsCenter);
+      bounds.getSize(this.boundsHalf).multiplyScalar(0.5);
+      mid = normal.dot(this.boundsCenter);
+      radius =
+        Math.abs(normal.x) * this.boundsHalf.x +
+        Math.abs(normal.y) * this.boundsHalf.y +
+        Math.abs(normal.z) * this.boundsHalf.z;
+    } else {
+      this.boundsCenter.set(0, 0, 0);
+      this.boundsHalf.setScalar(FIT_SIZE / 2);
+    }
+    this.localPlane.normal.copy(normal);
+    this.localPlane.constant = -(mid + this.sweep.depth * radius * SECTION_TRAVEL);
+
+    // The ghost pane rides the same plane: centred over the specimen, facing
+    // the normal, wide enough to cover the largest cut this box can produce.
+    const travel = this.sweep.depth * radius * SECTION_TRAVEL;
+    this.helperPosition.copy(this.boundsCenter).addScaledVector(normal, travel);
+    this.helperQuaternion.setFromUnitVectors(AnatomyViewer.PLANE_FORWARD, normal);
+    this.helperScale.setScalar(this.boundsHalf.length() * 2 * 1.08);
+    this.helperPose.compose(this.helperPosition, this.helperQuaternion, this.helperScale);
+
+    this.syncWorldPlane();
+    this.dirty = true;
+  }
+
+  /** three.js clips in world space, so the organ-space plane is carried through
+   *  the pivot each frame — the cut then rides with the specimen. */
+  private syncWorldPlane() {
+    const pivot = this.organ?.pivot;
+    if (!pivot) {
+      this.clipPlane.copy(this.localPlane);
+      this.sectionHelper.matrix.copy(this.helperPose);
+      this.sectionHelper.matrixWorldNeedsUpdate = true;
+      return;
+    }
+    pivot.updateWorldMatrix(true, false);
+    this.clipPlane.copy(this.localPlane).applyMatrix4(pivot.matrixWorld);
+    // The pane inherits the pivot's whole transform, so it scales and settles
+    // with the intro animation just like the specimen it cuts.
+    this.sectionHelper.matrix.multiplyMatrices(pivot.matrixWorld, this.helperPose);
+    this.sectionHelper.matrixWorldNeedsUpdate = true;
+  }
+
+  /** Snapshots the current view direction into organ space, so a "free" cut
+   *  opens towards the viewer and then stays put while they orbit around it. */
+  private captureFreeNormal() {
+    const direction = new THREE.Vector3().subVectors(this.controls.target, this.camera.position);
+    direction.y = 0;
+    if (direction.lengthSq() < 1e-6) direction.set(0, 0, -1);
+    direction.normalize();
+    const pivot = this.organ?.pivot;
+    if (pivot) {
+      pivot.updateWorldMatrix(true, false);
+      direction.applyMatrix3(new THREE.Matrix3().setFromMatrix4(pivot.matrixWorld).invert()).normalize();
+    }
+    this.freeNormal.copy(direction);
+  }
+
+  /**
+   * The organs are front-face-only shells, which a cut would otherwise reveal
+   * as a hole straight through to the background. Rendering both sides while
+   * clipped is what actually exposes the chambers, lobes, and inner walls.
+   */
   private applyClipping(enabled: boolean) {
     if (!this.organ) return;
+    // The pane lives and dies with the actual clip, not the toggle's state —
+    // so it stays on screen while the disable sweep carries it out of the
+    // specimen, and vanishes only once the cut itself is gone.
+    this.sectionHelper.visible = enabled && this.sectionPlaneShown;
     const planes = enabled ? [this.clipPlane] : null;
-    [...this.materials(this.organ), this.depthMaterial].forEach((material) => {
+    this.materials(this.organ).forEach((material) => {
       material.clippingPlanes = planes;
+      material.side = enabled ? THREE.DoubleSide : THREE.FrontSide;
       material.needsUpdate = true;
+    });
+    this.depthMaterial.clippingPlanes = planes;
+    this.depthMaterial.needsUpdate = true;
+    this.dirty = true;
+  }
+
+  toggleWireframe() {
+    return this.setWireframe(!this.wireframe);
+  }
+
+  toggleLayers() {
+    return this.toggleWireframe();
+  }
+
+  setWireframe(enabled: boolean) {
+    if (this.wireframe === enabled) return this.wireframe;
+    this.wireframe = enabled;
+    this.applyWireframe();
+    return this.wireframe;
+  }
+
+  private applyWireframe() {
+    if (!this.organ) return;
+    this.materials(this.organ).forEach((material) => {
+      if (material instanceof THREE.MeshStandardMaterial) material.wireframe = this.wireframe;
     });
     this.dirty = true;
   }
 
-  toggleLayers() {
-    if (!this.organ) return false;
-    let enabled = false;
-    this.materials(this.organ).forEach((material) => {
-      if (material instanceof THREE.MeshStandardMaterial) {
-        material.wireframe = !material.wireframe;
-        enabled = material.wireframe;
-      }
+  // ----------------------------------------------------------- quiz & authoring
+
+  /**
+   * Raycasts the actual mesh and reports the hit in pivot space — the same
+   * coordinate system hotspots are authored in.
+   */
+  private captureAuthorPoint(px: number, py: number) {
+    if (!this.organ) return;
+    const ndc = new THREE.Vector2((px / this.width) * 2 - 1, -(py / this.height) * 2 + 1);
+    this.authorRaycaster.setFromCamera(ndc, this.camera);
+    const hit = this.authorRaycaster.intersectObjects(this.organ.meshes, false)[0];
+    if (!hit) return;
+    const local = this.organ.pivot.worldToLocal(hit.point.clone());
+    this.callbacks.onAuthorPoint?.({
+      x: +local.x.toFixed(2),
+      y: +local.y.toFixed(2),
+      z: +local.z.toFixed(2),
     });
+  }
+
+  /** Where a dot currently sits, as a 0–1 fraction of the viewport height. */
+  hotspotScreenY(id: string): number | null {
+    const point = this.hotspots.screenPosition(id, this.camera, this.width, this.height);
+    return point ? point.y / this.height : null;
+  }
+
+  setQuizMode(enabled: boolean) {
+    this.quizMode = enabled;
+    this.select(null);
+    this.hotspots.clearFlash();
     this.dirty = true;
-    return enabled;
+  }
+
+  setAuthoring(enabled: boolean) {
+    this.authoring = enabled;
+    this.renderer.domElement.style.cursor = enabled ? "crosshair" : "";
+    this.dirty = true;
+  }
+
+  /** Green/red ring on a dot after a quiz answer. */
+  flash(id: string, correct: boolean) {
+    this.hotspots.flash(id, correct);
+    this.busy(1.1);
+  }
+
+  setCanvasLabel(label: string) {
+    this.renderer.domElement.setAttribute("aria-label", label);
+  }
+
+  setAriaLabel(label: string) {
+    this.setCanvasLabel(label);
+  }
+
+  // ----------------------------------------------------- function animation
+
+  /**
+   * Turns procedural function animation on or off. The motion is applied
+   * to the whole pivot (organ + hotspot dots), so the dots stay glued to the
+   * surface.
+   */
+  setFunctionAnimation(enabled: boolean) {
+    this.functionAnimation = enabled;
+    this.animationTime = 0;
+    if (!enabled && this.organ) {
+      const pivot = this.organ.pivot;
+      pivot.rotation.set(0.05, -0.28, 0);
+      pivot.scale.setScalar(1);
+      pivot.position.set(0, 0, 0);
+    }
+    this.dirty = true;
+  }
+
+  private applyFunctionAnimation(delta: number) {
+    const pivot = this.organ?.pivot;
+    if (!pivot) return;
+    this.animationTime += delta;
+    const t = this.animationTime;
+    switch (this.animationKey) {
+      case "heart": {
+        const phase = (t * 1.1) % 1;
+        const systole = phase < 0.16 ? Math.sin((phase / 0.16) * Math.PI) : 0;
+        const echo = phase >= 0.34 && phase < 0.5 ? Math.sin(((phase - 0.34) / 0.16) * Math.PI) * 0.5 : 0;
+        pivot.scale.setScalar(1 + (systole + echo) * 0.045);
+        break;
+      }
+      case "lungs": {
+        const breath = Math.sin(t * Math.PI * 2 * 0.22);
+        pivot.scale.setScalar(1 + 0.04 * breath);
+        pivot.position.y = 0.03 * breath;
+        break;
+      }
+      case "brain":
+      case "liver":
+      case "kidneys": {
+        pivot.scale.setScalar(1 + 0.018 * Math.sin(t * Math.PI * 2 * 0.9));
+        break;
+      }
+      case "eyeball": {
+        pivot.rotation.x = 0.02 + 0.05 * Math.sin(t * Math.PI * 2 * 0.25);
+        pivot.rotation.z = 0.02 * Math.sin(t * Math.PI * 2 * 0.35);
+        pivot.scale.setScalar(1 + 0.01 * Math.sin(t * Math.PI * 2 * 1.1));
+        break;
+      }
+      case "intestine": {
+        pivot.scale.setScalar(1 + 0.025 * Math.sin(t * Math.PI * 2 * 0.7));
+        pivot.rotation.z = 0.015 * Math.sin(t * Math.PI * 2 * 0.5);
+        break;
+      }
+      case "pancreas":
+      case "skin":
+      default: {
+        pivot.position.y = 0.04 * Math.sin(t * Math.PI * 2 * 0.4);
+        pivot.scale.setScalar(1 + 0.008 * Math.sin(t * Math.PI * 2 * 0.8));
+        break;
+      }
+    }
+    this.dirty = true;
+  }
+
+  /** Re-labels the dots without reloading the model. */
+  updateHotspots(hotspots: Hotspot[]) {
+    if (!this.organ) return;
+    this.hotspots.attach(this.organ.pivot, hotspots, this.organ.meshes);
+    this.hotspots.setPixelSize(DOT_PIXELS, this.height, CAMERA_FOV);
+    if (this.crossSection) this.applyClipping(true);
+    this.dirty = true;
   }
 
   dispose() {
@@ -669,6 +1096,8 @@ export class AnatomyViewer {
     this.loadRequest += 1;
     cancelAnimationFrame(this.frame);
     gsap.killTweensOf(this.camera.position);
+    gsap.killTweensOf(this.sweep);
+    gsap.killTweensOf(this.dressing);
     this.controls.removeEventListener("start", this.onControlStart);
     this.controls.dispose();
     this.resizeObserver.disconnect();
@@ -684,9 +1113,19 @@ export class AnatomyViewer {
 
     this.hotspots.dispose();
     this.depthMaterial.dispose();
+    this.sectionHelper.children.forEach((child) => {
+      if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) child.geometry.dispose();
+    });
+    this.sectionHelperFill.dispose();
+    this.sectionHelperRim.dispose();
     this.assets.dispose();
     this.scene.environment?.dispose();
-    (this.contactShadow.material as THREE.MeshBasicMaterial).map?.dispose();
+    const shadowMaterial = this.contactShadow.material as THREE.MeshBasicMaterial;
+    shadowMaterial.map?.dispose();
+    shadowMaterial.dispose();
+    this.contactShadow.geometry.dispose();
+    this.particles.geometry.dispose();
+    (this.particles.material as THREE.PointsMaterial).dispose();
     this.renderer.dispose();
     canvas.remove();
   }

@@ -203,7 +203,15 @@ export class HotspotLayer {
    * ring. Returns false while values are still easing so the viewer knows it
    * has to schedule another frame.
    */
-  update(camera: THREE.Camera, delta: number, selectedId: string | null, hoveredId: string | null) {
+  update(
+    camera: THREE.Camera,
+    delta: number,
+    selectedId: string | null,
+    hoveredId: string | null,
+    /** Cutting plane, in the same space as the anchors. Markers on the half
+     *  being taken away fade out with it instead of floating in the gap. */
+    clip: THREE.Plane | null = null,
+  ) {
     if (!this.markers.length) return true;
     this.time += delta;
     this.group.updateWorldMatrix(true, false);
@@ -232,7 +240,8 @@ export class HotspotLayer {
       const radius = this.outward.length();
       this.toCamera.copy(camera.position).sub(this.world).normalize();
       const facing = radius > 1e-4 ? this.outward.divideScalar(radius).dot(this.toCamera) : 1;
-      const target = THREE.MathUtils.smoothstep(facing, -0.05, 0.3);
+      const clipped = clip !== null && clip.distanceToPoint(marker.anchor) < 0;
+      const target = clipped ? 0 : THREE.MathUtils.smoothstep(facing, -0.05, 0.3);
 
       const active = marker.hotspot.id === selectedId || marker.hotspot.id === hoveredId;
       const emphasisTarget = active ? 1 : 0;

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 820" role="img" aria-label="Schematic pelvic ultrasound illustration">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="80%">
+      <stop offset="0%" stop-color="#2a3038"/>
+      <stop offset="100%" stop-color="#12151a"/>
+    </radialGradient>
+    <radialGradient id="bladder" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#05070a"/>
+      <stop offset="80%" stop-color="#0a0d12"/>
+      <stop offset="100%" stop-color="#1a1f26"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <rect width="820" height="820" fill="url(#bg)"/>
+  <!-- Ultrasound sector frame -->
+  <path d="M100 760 L 330 130 A 700 700 0 0 1 490 130 L 720 760 Z" fill="#0c0f13"/>
+  <!-- Surrounding soft tissue speckle -->
+  <g opacity="0.16">
+    <circle cx="180" cy="600" r="3" fill="#9fb0c0"/><circle cx="260" cy="660" r="4" fill="#9fb0c0"/>
+    <circle cx="620" cy="620" r="3" fill="#9fb0c0"/><circle cx="680" cy="540" r="4" fill="#9fb0c0"/>
+    <circle cx="140" cy="470" r="3" fill="#9fb0c0"/><circle cx="690" cy="430" r="3" fill="#9fb0c0"/>
+    <circle cx="350" cy="160" r="3" fill="#9fb0c0"/><circle cx="470" cy="170" r="3" fill="#9fb0c0"/>
+    <circle cx="200" cy="330" r="3" fill="#9fb0c0"/><circle cx="640" cy="330" r="3" fill="#9fb0c0"/>
+  </g>
+  <!-- Bladder: dark fluid with bright wall -->
+  <ellipse cx="410" cy="480" rx="225" ry="170" fill="url(#bladder)" filter="url(#soft)"/>
+  <ellipse cx="410" cy="480" rx="225" ry="170" fill="none" stroke="#e8e4d8" stroke-width="10" opacity="0.95"/>
+  <ellipse cx="410" cy="480" rx="208" ry="156" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.5"/>
+  <!-- Posterior acoustic enhancement (bright band below the bladder) -->
+  <rect x="300" y="650" width="220" height="80" rx="30" fill="#3d4652" opacity="0.6"/>
+  <!-- Scan wedge lines -->
+  <path d="M330 130 L 300 760" stroke="#5c6b7a" stroke-width="2" opacity="0.25"/>
+  <path d="M490 130 L 520 760" stroke="#5c6b7a" stroke-width="2" opacity="0.25"/>
+</svg>

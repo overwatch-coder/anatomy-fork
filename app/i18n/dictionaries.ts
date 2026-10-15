@@ -16,6 +16,7 @@ const uiLoaders: Record<string, () => Promise<UiDictionary>> = {
   ru: () => import("./ui/ru").then((m) => m.ui),
   id: () => import("./ui/id").then((m) => m.ui),
   ko: () => import("./ui/ko").then((m) => m.ui),
+  it: () => import("./ui/it").then((m) => m.ui),
 };
 
 const organLoaders: Record<string, () => Promise<OrganContentDictionary>> = {
@@ -31,6 +32,7 @@ const organLoaders: Record<string, () => Promise<OrganContentDictionary>> = {
   ru: () => import("./organs/ru").then((m) => m.organs),
   id: () => import("./organs/id").then((m) => m.organs),
   ko: () => import("./organs/ko").then((m) => m.organs),
+  it: () => import("./organs/it").then((m) => m.organs),
 };
 
 export async function getDictionary(locale: string): Promise<Dictionary> {

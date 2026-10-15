@@ -15,7 +15,7 @@
  *
  * Run: npm run i18n:audit
  */
-import { organStructures } from "../app/lib/anatomy-data.ts";
+import { coreOrganStructures as organStructures } from "../app/lib/anatomy-data.ts";
 import { locales } from "../app/i18n/config.ts";
 
 const RESET = "[0m";

@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import {
   Box,
   CircleDashed,
+  Grid2x2,
   Layers3,
   Maximize2,
   RotateCcw,
-  ScanLine,
   Search,
   Check,
   Crosshair,
@@ -16,7 +16,10 @@ import {
 } from "lucide-react";
 import type { Hotspot, Organ } from "../i18n/merge";
 import { format, type UiDictionary } from "../i18n/types";
-import type { AnatomyViewer } from "../lib/three/viewer";
+import type { AnatomyViewer, SectionAxis } from "../lib/three/viewer";
+import { SectionControls } from "./SectionControls";
+
+const SECTION_DEFAULTS = { axis: "free" as SectionAxis, depth: 0, flipped: false, showPlane: true };
 
 type Props = {
   organ: Organ;
@@ -170,9 +173,10 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   const canvasLabelRef = useRef(t.viewer.canvas);
   const [selected, setSelected] = useState<Hotspot | null>(null);
   const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
   const [slowLoad, setSlowLoad] = useState(false);
-  const [activeTool, setActiveTool] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [active, setActive] = useState({ isolate: false, section: false, wireframe: false });
+  const [section, setSection] = useState(SECTION_DEFAULTS);
 
   // Opt-in coordinate probe for placing hotspots — not a user-facing feature.
   const authoring = useAuthoringFlag();
@@ -266,30 +270,63 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
     viewerRef.current?.attachCallout(node);
   }, []);
 
+  const handleAxis = (axis: SectionAxis) => {
+    viewerRef.current?.setSectionAxis(axis);
+    setSection((state) => ({ ...state, axis }));
+  };
+
+  const handleDepth = (depth: number) => {
+    viewerRef.current?.setSectionDepth(depth);
+    setSection((state) => ({ ...state, depth }));
+  };
+
+  const handleFlip = () => {
+    const flipped = viewerRef.current?.toggleSectionFlip() ?? false;
+    setSection((state) => ({ ...state, flipped }));
+  };
+
+  const handleShowPlane = (shown: boolean) => {
+    const showPlane = viewerRef.current?.setSectionPlaneVisible(shown) ?? true;
+    setSection((state) => ({ ...state, showPlane }));
+  };
+
   const handleTool = (tool: string) => {
     const viewer = viewerRef.current;
     if (!viewer) return;
     if (tool === "rotate") onAutoRotate(!autoRotate);
     if (tool === "zoom") viewer.zoom(-1);
-    if (tool === "isolate") setActiveTool(viewer.toggleIsolate() ? tool : null);
-    if (tool === "section") setActiveTool(viewer.toggleCrossSection() ? tool : null);
-    if (tool === "layers") setActiveTool(viewer.toggleLayers() ? tool : null);
+    if (tool === "isolate") setActive((state) => ({ ...state, isolate: viewer.toggleIsolate() }));
+    if (tool === "section") {
+      const on = viewer.toggleCrossSection();
+      setActive((state) => ({ ...state, section: on }));
+      if (on && autoRotate) onAutoRotate(false);
+    }
+    if (tool === "wireframe" || tool === "layers") {
+      setActive((state) => ({ ...state, wireframe: viewer.toggleWireframe() }));
+    }
     if (tool === "compare") onCompare();
     if (tool === "reset") {
       viewer.reset();
-      setActiveTool(null);
+      setActive({ isolate: false, section: false, wireframe: false });
+      setSection(SECTION_DEFAULTS);
     }
   };
 
   const tools = [
-    { id: "rotate", label: t.tools.rotate, icon: RotateCcw },
-    { id: "zoom", label: t.tools.zoom, icon: Search },
-    { id: "isolate", label: t.tools.isolate, icon: CircleDashed },
-    { id: "section", label: t.tools.section, icon: ScanLine },
-    { id: "layers", label: t.tools.layers, icon: Layers3 },
-    { id: "compare", label: t.tools.compare, icon: Box },
-    { id: "reset", label: t.tools.reset, icon: RotateCcw },
+    { id: "rotate", label: t.tools.rotate, icon: RotateCcw, toggle: true },
+    { id: "zoom", label: t.tools.zoom, icon: Search, toggle: false },
+    { id: "isolate", label: t.tools.isolate, icon: CircleDashed, toggle: true },
+    { id: "section", label: t.tools.section, icon: Layers3, toggle: true },
+    { id: "wireframe", label: t.tools.layers, icon: Grid2x2, toggle: true },
+    { id: "compare", label: t.tools.compare, icon: Box, toggle: true },
+    { id: "reset", label: t.tools.reset, icon: RotateCcw, toggle: false },
   ];
+
+  const isActive = (id: string) => {
+    if (id === "compare") return compare;
+    if (id === "rotate") return autoRotate;
+    return id in active && active[id as keyof typeof active];
+  };
 
   return (
     <section className="viewer-shell" aria-label={format(t.viewer.title, { organ: organ.name })}>
@@ -297,13 +334,13 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       <div ref={mountRef} className="three-mount" />
 
       <div className="viewer-tools" aria-label={t.tools.label}>
-        {tools.map(({ id, label, icon: Icon }) => (
+        {tools.map(({ id, label, icon: Icon, toggle }) => (
           <button
             key={id}
             type="button"
-            className={`tool-button ${(activeTool === id || (id === "compare" && compare)) ? "active" : ""}`}
+            className={`tool-button ${isActive(id) ? "active" : ""}`}
             onClick={() => handleTool(id)}
-            aria-pressed={activeTool === id || (id === "compare" && compare)}
+            aria-pressed={toggle ? isActive(id) : undefined}
             title={label}
           >
             <Icon size={19} strokeWidth={1.65} />
@@ -311,6 +348,19 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
           </button>
         ))}
       </div>
+
+      {active.section && !quizActive && (
+        <SectionControls
+          axis={section.axis}
+          depth={section.depth}
+          flipped={section.flipped}
+          showPlane={section.showPlane}
+          onAxis={handleAxis}
+          onDepth={handleDepth}
+          onFlip={handleFlip}
+          onShowPlane={handleShowPlane}
+        />
+      )}
 
       {!quizActive && (
       <aside className="tip-note" aria-label={t.viewer.tip}>

@@ -1,9 +1,12 @@
+import { extraOrgans } from "./organs-extra";
+import { organs as enOrgansData } from "../i18n/organs/en";
+
 // STRUCTURE ONLY — no translatable prose lives here.
 // Every organ and hotspot is identified by a stable id plus its Terminologia
 // Anatomica (TA2) Latin term, which is the canonical key locale files translate
 // against. Positions, colours, and model paths are locale-independent.
 
-export type OrganId =
+export type CoreOrganId =
   | "heart"
   | "brain"
   | "lungs"
@@ -13,6 +16,31 @@ export type OrganId =
   | "intestine"
   | "pancreas"
   | "skin";
+
+export type ExtraOrganId =
+  | "stomach"
+  | "gallbladder"
+  | "esophagus"
+  | "tongue"
+  | "spleen"
+  | "thymus"
+  | "lymph-node"
+  | "thyroid"
+  | "adrenal"
+  | "pituitary"
+  | "trachea"
+  | "larynx"
+  | "bladder"
+  | "uterus"
+  | "ovary"
+  | "testis"
+  | "prostate"
+  | "spinal-cord"
+  | "diaphragm"
+  | "biceps"
+  | "femur";
+
+export type OrganId = CoreOrganId | ExtraOrganId;
 
 export type HotspotStructure = {
   id: string;
@@ -34,7 +62,41 @@ export type OrganStructure = {
   hotspots: HotspotStructure[];
 };
 
-export const organStructures: OrganStructure[] = [
+export type Hotspot = {
+  id: string;
+  label: string;
+  detail: string;
+  position: [number, number, number];
+  color: string;
+};
+
+export type Organ = {
+  id: OrganId;
+  name: string;
+  scientificName: string;
+  system: string;
+  model: string;
+  icon: string;
+  accent: string;
+  description: string;
+  poetic: string;
+  size: string;
+  weight: string;
+  location: string;
+  function: string;
+  dailyFact: string;
+  medical: string;
+  bloodSupply: string;
+  funFact: string;
+  tissue: string;
+  comparison: string;
+  conditions: string[];
+  illustrated: boolean;
+  hotspots: Hotspot[];
+  genitive?: string;
+};
+
+export const coreOrganStructures: OrganStructure[] = [
   {
     id: "heart",
     model: "/models/heart.glb",
@@ -162,7 +224,39 @@ export const organStructures: OrganStructure[] = [
   },
 ];
 
-export const organIds = organStructures.map((organ) => organ.id);
+export const extraStructures: OrganStructure[] = extraOrgans.map((extra) => ({
+  id: extra.id,
+  model: extra.model,
+  icon: extra.icon,
+  accent: extra.accent,
+  illustrated: extra.illustrated,
+  scientificName: extra.scientificName,
+  hotspots: extra.hotspots.map((h) => ({
+    id: h.id,
+    ta: h.label,
+    position: h.position,
+    color: h.color,
+  })),
+}));
+
+export const organStructures: OrganStructure[] = [...coreOrganStructures, ...extraStructures];
 export const structureById = Object.fromEntries(
   organStructures.map((organ) => [organ.id, organ]),
 ) as Record<OrganId, OrganStructure>;
+export const organIds = organStructures.map((organ) => organ.id);
+
+export const coreOrgans: Organ[] = coreOrganStructures.map((structure) => {
+  const content = enOrgansData[structure.id as keyof typeof enOrgansData];
+  return {
+    ...structure,
+    ...content,
+    hotspots: structure.hotspots.map((h) => ({
+      ...h,
+      label: content?.hotspots?.[h.id]?.label ?? h.ta,
+      detail: content?.hotspots?.[h.id]?.detail ?? "",
+    })),
+  };
+});
+
+export const organs: Organ[] = [...coreOrgans, ...extraOrgans];
+export const organById = Object.fromEntries(organs.map((o) => [o.id, o])) as Record<OrganId, Organ>;

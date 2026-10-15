@@ -15,6 +15,12 @@ export type LoadedOrgan = {
   pivot: THREE.Group;
   meshes: THREE.Mesh[];
   mixer: THREE.AnimationMixer | null;
+  /**
+   * Extent in that same space. Organs are fitted by their longest axis, so a
+   * flat organ is nowhere near FIT_SIZE on its other two — the cutting plane
+   * needs the real box to know how far it has to travel to cross this organ.
+   */
+  bounds: THREE.Box3;
 };
 
 export class AnatomyAssetManager {
@@ -77,6 +83,11 @@ export class AnatomyAssetManager {
     const scale = FIT_SIZE / Math.max(size.x, size.y, size.z, 0.001);
     model.scale.setScalar(scale);
     model.position.copy(center.multiplyScalar(-scale));
+
+    // Measured while the model is still parentless, so its world matrix is its
+    // own — which is exactly the space hotspots and the cutting plane work in.
+    model.updateWorldMatrix(false, true);
+    const bounds = new THREE.Box3().setFromObject(model);
 
     // The pivot is what the viewer animates and what hotspots are parented to,
     // so hotspot coordinates stay in the normalised FIT_SIZE space.
@@ -151,7 +162,7 @@ export class AnatomyAssetManager {
       gltf.animations.forEach((clip) => mixer?.clipAction(clip).play());
     }
 
-    return { url, pivot, meshes, mixer };
+    return { url, pivot, meshes, mixer, bounds };
   }
 
   /** Undoes viewer tools (wireframe, clipping, fade) before a cached organ returns. */
@@ -165,6 +176,9 @@ export class AnatomyAssetManager {
         material.depthWrite = true;
         material.clippingPlanes = null;
         material.clipShadows = false;
+        // Cross-section flips these shells to DoubleSide to expose their
+        // interior; a cached organ has to come back single-sided.
+        material.side = THREE.FrontSide;
         if (material instanceof THREE.MeshStandardMaterial) material.wireframe = false;
         material.needsUpdate = true;
       });

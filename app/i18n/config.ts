@@ -27,6 +27,7 @@ export const locales: LocaleConfig[] = [
   { code: "ru", nativeName: "Русский",  englishName: "Russian",    country: "Russia",        dir: "ltr", script: "cyrillic",   intl: "ru_RU" },
   { code: "id", nativeName: "Indonesia", englishName: "Indonesian", country: "Indonesia",    dir: "ltr", script: "latin",      intl: "id_ID" },
   { code: "ko", nativeName: "한국어",     englishName: "Korean",     country: "South Korea",   dir: "ltr", script: "kr",         intl: "ko_KR" },
+  { code: "it", nativeName: "Italiano",  englishName: "Italian",    country: "Italy",         dir: "ltr", script: "latin",      intl: "it_IT" },
 ];
 
 export const defaultLocale = "en";

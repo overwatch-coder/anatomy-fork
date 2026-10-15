@@ -1,91 +1,93 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
+import { access } from "node:fs/promises";
 import test from "node:test";
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
 const templateRoot = new URL("../", import.meta.url);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
 
-async function render() {
+/**
+ * Renders the built worker the way the platform does. The query string keeps
+ * each `import()` distinct so tests do not share a module instance.
+ */
+async function render(path = "/en") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+    new Request(`http://localhost${path}`, { headers: { accept: "text/html" } }),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
   );
 }
 
-test("server-renders the starter loading skeleton", async () => {
-  const response = await render();
+let cached;
+async function html() {
+  cached ??= await render("/en").then((response) => response.text());
+  return cached;
+}
+
+test("serves the document", async () => {
+  const rootResponse = await render("/");
+  assert.equal(rootResponse.status, 307);
+  assert.equal(rootResponse.headers.get("location"), "/en");
+
+  const response = await render("/en");
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.match(html, developmentPreviewMeta);
-  assert.match(html, /<title>Your site is taking shape<\/title>/i);
-  assert.match(html, /Building your site/);
-  assert.match(html, /Your site is taking shape/);
-  assert.match(
-    html,
-    /Your first version will appear here automatically when it’s ready\./,
-  );
-  assert.doesNotMatch(html, /Codex/);
-  assert.match(html, /react-loading-skeleton/);
-  assert.match(html, /role="status"/);
 });
 
-test("keeps the loading skeleton scoped and disposable", async () => {
-  const [preview, css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("SkeletonPreview.tsx", previewRoot), "utf8"),
-    readFile(new URL("preview.css", previewRoot), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(previewRoot),
-  ]);
+test("renders the page identity and its social metadata", async () => {
+  const page = await html();
+  assert.match(page, /<title>Anatomy Atelier — Learn anatomy like an artist<\/title>/);
+  assert.match(page, /<meta name="description" content="Explore medically detailed 3D organs/);
+  assert.match(page, /og:image/);
+  assert.match(page, /apple-touch-icon/);
+});
 
-  assert.deepEqual(files.sort(), ["SkeletonPreview.tsx", "preview.css"]);
-  assert.match(preview, /from "react-loading-skeleton"/);
-  assert.match(preview, /baseColor="#eceae7"/);
-  assert.match(preview, /highlightColor="#f9f8f6"/);
-  assert.match(preview, /duration=\{2\.8\}/);
-  assert.match(preview, /sites-skeleton-search-placeholder/);
-  assert.match(packageJson, /"react-loading-skeleton": "3\.5\.0"/);
+test("renders the organ library with every organ", async () => {
+  const page = await html();
+  assert.match(page, /Organ library/);
+  for (const organ of ["Heart", "Brain", "Lungs", "Liver", "Kidneys", "Eye", "Intestine", "Pancreas", "Skin"]) {
+    assert.ok(page.includes(`>${organ}<`), `organ library is missing ${organ}`);
+  }
+});
 
-  const shellIndex = preview.indexOf('className="sites-skeleton-shell"');
-  const statusIndex = preview.indexOf('className="sites-skeleton-status"');
-  assert.ok(shellIndex >= 0 && statusIndex > shellIndex);
-  assert.match(css, /position:\s*fixed/);
-  assert.match(css, /inset:\s*0/);
-  assert.match(css, /opacity:\s*0\.52/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /#020617|canvas|pets|progress/i);
-  assert.doesNotMatch(
-    preview,
-    /loading-spinner|status-mark|status-progress|canvas|cookie|random/i,
-  );
+test("server-renders the selected organ rather than an empty shell", async () => {
+  const page = await html();
+  // Heart is the default selection: name, scientific name, poetic line, the
+  // tissue and a clinical note all come from anatomy-data.
+  assert.match(page, /The tireless pump/);
+  assert.match(page, /Cardiovascular/);
+  assert.match(page, /Cor/);
+  assert.match(page, /Cardiac muscle tissue/);
+  assert.match(page, /Coronary artery disease/);
+  assert.match(page, /anatomy\/heart\/thumb\.webp/);
+});
 
-  assert.match(page, /export const metadata:\s*Metadata/);
-  assert.match(page, /"codex-preview": "development"/);
-  assert.match(page, /<SkeletonPreview \/>/);
-  assert.match(layout, /title:\s*"Starter Project"/);
-  assert.doesNotMatch(layout, /codex-preview|_sites-preview|themeColor|\bViewport\b/);
-  assert.doesNotMatch(css, /(^|\s)(html|body)\s*\{/m);
+test("ships the viewer mount and a text equivalent for its hotspots", async () => {
+  const page = await html();
+  // The canvas is created on the client, so the server must at least emit the
+  // mount and the labelled controls around it.
+  assert.match(page, /three-mount/);
+  assert.match(page, /viewer-tools/);
+  assert.match(page, /aria-label/);
+  // Hotspot dots live inside the canvas; this list is their accessible
+  // equivalent and has to be in the server output to be of any use.
+  assert.match(page, /hotspot-index/);
+  assert.match(page, /Aorta/);
+  assert.match(page, /Left Atrium/);
+});
 
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
+test("carries no trace of the vinext starter it was scaffolded from", async () => {
+  const page = await html();
+  for (const leftover of [
+    "react-loading-skeleton",
+    "Your site is taking shape",
+    "Starter Project",
+    "codex-preview",
+  ]) {
+    assert.ok(!page.includes(leftover), `starter leftover in rendered output: ${leftover}`);
+  }
+  await assert.rejects(access(new URL("app/_sites-preview", templateRoot)));
+  await assert.rejects(access(new URL("public/_sites-preview", templateRoot)));
 });
