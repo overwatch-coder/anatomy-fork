@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "npm run build:next"
+  "buildCommand": "npm run build:next",
+  "env": {
+    "NEXT_TELEMETRY_DISABLED": "1"
+  }
 }
