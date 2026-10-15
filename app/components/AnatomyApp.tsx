@@ -323,7 +323,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         </article>
         <article>
           <header><div><em>{t.cards.clinicalNotes}</em><h3>{t.cards.commonConditions}</h3></div><FileText size={17} /></header>
-          <ul>{organ.conditions.map((condition) => <li key={condition}>{condition}</li>)}</ul>
+          <ul>{organ.conditions?.map((condition) => <li key={condition}>{condition}</li>)}</ul>
           <button onClick={() => setModal("lesson")}>{t.cards.seeAll} <ArrowRight size={14} /></button>
         </article>
         <article className="system-card">
@@ -439,7 +439,19 @@ function LearningModal({
 
         {type === "quiz" ? (
           <div className="quiz-container" style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
-            {!quizFinished && currentQ ? (
+            {organQuestions.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
+                <p style={{ fontSize: "1.1rem" }}>Theory questions for this organ will be available soon.</p>
+                <button
+                  type="button"
+                  className="lesson-button"
+                  onClick={onStartLabelQuiz}
+                  style={{ background: "var(--coral)", color: "#fff", marginTop: "1rem" }}
+                >
+                  Take 3D Labelling Quiz
+                </button>
+              </div>
+            ) : !quizFinished && currentQ ? (
               <>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem", color: "var(--muted)" }}>
                   <span>Question {qIndex + 1} of {organQuestions.length}</span>
@@ -447,7 +459,7 @@ function LearningModal({
                 </div>
                 <p style={{ fontWeight: 600, fontSize: "1.1rem", marginBottom: "1rem" }}>{currentQ.prompt}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {currentQ.options.map((option, i) => {
+                  {currentQ.options?.map((option, i) => {
                     const isPicked = selectedOption === i;
                     const isCorrect = i === currentQ.correct;
                     let bg = "rgba(0,0,0,0.03)";
@@ -522,7 +534,7 @@ function LearningModal({
           <div className="lesson-container" style={{ textAlign: "left", width: "100%", maxHeight: "65vh", overflowY: "auto", paddingRight: "8px" }}>
             <h3 style={{ marginTop: "0.5rem" }}>Learning Objectives</h3>
             <ul>
-              {organLesson.objectives.map((obj: string, i: number) => (
+              {organLesson.objectives?.map((obj: string, i: number) => (
                 <li key={i} style={{ margin: "4px 0" }}>{obj}</li>
               ))}
             </ul>
@@ -532,38 +544,63 @@ function LearningModal({
             <p style={{ lineHeight: 1.6 }}>{organLesson.function}</p>
             <h3 style={{ marginTop: "1rem" }}>Clinical Correlates</h3>
             <ul>
-              {organLesson.clinical.map((clin: string, i: number) => (
+              {organLesson.clinical?.map((clin: string, i: number) => (
                 <li key={i} style={{ margin: "4px 0" }}>{clin}</li>
               ))}
             </ul>
-            <h3 style={{ marginTop: "1rem" }}>Literature & Canonical References</h3>
-            <ul>
-              {organLesson.sources.map((src: string, i: number) => (
-                <li key={i} style={{ margin: "4px 0", fontSize: "0.88rem", color: "var(--muted)" }}>{src}</li>
-              ))}
-            </ul>
+            {Array.isArray(organLesson.sources) && organLesson.sources.length > 0 && (
+              <>
+                <h3 style={{ marginTop: "1rem" }}>Literature & Canonical References</h3>
+                <ul>
+                  {organLesson.sources.map((src: string, i: number) => (
+                    <li key={i} style={{ margin: "4px 0", fontSize: "0.88rem", color: "var(--muted)" }}>{src}</li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
-        ) : type === "inside" && organHisto ? (
-          <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
-            <p><b>Tissue Type:</b> {organ.tissue}</p>
-            <p style={{ lineHeight: 1.6 }}>{organHisto.stain} — {organHisto.features}</p>
-            <h3 style={{ marginTop: "1rem" }}>Histological Layers</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {organHisto.layers.map((l: { name: string; description: string }, i: number) => (
-                <div key={i} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.03)", borderRadius: "8px" }}>
-                  <b>{l.name}:</b> <span>{l.description}</span>
+        ) : type === "inside" ? (
+          <>
+            <p>{organ.tissue}</p>
+            <figure className="modal-figure">
+              <OrganArt organ={organ} asset="microscopic" alt="" />
+            </figure>
+            <dl className="modal-facts">
+              <div><dt>{t.info.function}</dt><dd><Measure>{organ.function}</Measure></dd></div>
+              <div><dt>{t.info.daily}</dt><dd><Measure>{organ.dailyFact}</Measure></dd></div>
+              <div><dt>{t.info.bloodSupply}</dt><dd><Measure>{organ.bloodSupply}</Measure></dd></div>
+            </dl>
+            {Array.isArray(organHisto) && organHisto.length > 0 && (
+              <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
+                <h3 style={{ marginTop: "0.5rem", fontSize: "1.05rem" }}>Histological Layers</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "0.5rem" }}>
+                  {organHisto.map((l: { name: string; detail: string }, i: number) => (
+                    <div key={i} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.03)", borderRadius: "8px", fontSize: "0.9rem" }}>
+                      <b>{l.name}:</b> <span>{l.detail}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            )}
+          </>
+        ) : type === "animation" ? (
+          <>
+            <p>{format(t.modal.motionTitle, vars)}</p>
+            <div className="modal-demo moving">
+              <OrganArt organ={organ} asset="organ" alt="" />
             </div>
-          </div>
-        ) : type === "animation" && organAnim ? (
-          <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
-            <h3 style={{ marginTop: "0.5rem" }}>{organAnim.label}</h3>
-            <p style={{ lineHeight: 1.6 }}>{organAnim.description}</p>
-            <p style={{ marginTop: "1rem", fontStyle: "italic", color: "var(--muted)" }}>
-              {organAnim.clinical}
-            </p>
-          </div>
+            {organAnim && (
+              <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
+                <h3 style={{ marginTop: "0.5rem" }}>{organAnim.label}</h3>
+                <p style={{ lineHeight: 1.6 }}>{organAnim.description}</p>
+                {organAnim.clinical && (
+                  <p style={{ marginTop: "0.5rem", fontStyle: "italic", color: "var(--muted)" }}>
+                    {organAnim.clinical}
+                  </p>
+                )}
+              </div>
+            )}
+          </>
         ) : type === "profile" ? (
           <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
             <p><b>Organs Visited:</b> {Object.keys(progress.visited).length} / 30</p>
@@ -596,7 +633,7 @@ function LearningModal({
         ) : (
           <>
             <p>{t.modal.lessonBody}</p>
-            <div className={`modal-demo ${type === "animation" ? "moving" : ""}`}><OrganArt organ={organ} asset="organ" alt="" /></div>
+            <div className="modal-demo"><OrganArt organ={organ} asset="organ" alt="" /></div>
             <button className="lesson-button" onClick={onClose}>{t.modal.continueExploring} <ArrowRight size={16} /></button>
           </>
         )}
