@@ -21,7 +21,7 @@ export interface AppHeaderProps {
   t?: UiDictionary;
   activePage?: NavPage;
   onBrandClick?: () => void;
-  onOpenModal?: (modal: "lesson" | "profile" | "quiz" | "compare") => void;
+  onOpenModal?: (modal: "lesson" | "profile" | "quiz" | "compare" | "notes") => void;
   onToggleSaved?: () => void;
   showSavedOnly?: boolean;
   onOpenLibrary?: () => void;
@@ -144,7 +144,7 @@ export function AppHeader({
           {onOpenModal ? (
             <button
               type="button"
-              onClick={() => onOpenModal("profile")}
+              onClick={() => onOpenModal("notes")}
               className={activePage === "notes" ? "active" : ""}
             >
               <NotebookPen size={17} />
@@ -152,7 +152,7 @@ export function AppHeader({
             </button>
           ) : (
             <Link
-              href={`/${localeCode}?modal=profile`}
+              href={`/${localeCode}?modal=notes`}
               className={activePage === "notes" ? "active" : ""}
             >
               <NotebookPen size={17} />

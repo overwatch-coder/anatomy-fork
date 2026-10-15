@@ -11,8 +11,13 @@ import {
   BrainCircuit,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CircleHelp,
+  Clock,
   Compass,
+  Copy,
+  Download,
   Eye,
   FileText,
   Globe,
@@ -21,12 +26,14 @@ import {
   Microscope,
   NotebookPen,
   Play,
+  Plus,
   RotateCcw,
   Search,
   Share2,
   Sparkles,
   SplitSquareVertical,
   Stethoscope,
+  Trash2,
   X,
 } from "lucide-react";
 import { OrganViewer } from "./OrganViewer";
@@ -41,7 +48,7 @@ import { histology } from "../lib/content/histology";
 import { functionAnimations } from "../lib/content/animations";
 import { progressStore, useProgress } from "../lib/progress";
 
-type Modal = "lesson" | "quiz" | "animation" | "system" | "inside" | "profile" | "compare" | null;
+type Modal = "lesson" | "quiz" | "animation" | "system" | "inside" | "profile" | "compare" | "notes" | null;
 
 /**
  * Renders an organ illustration, or its accent glyph for organs that ship as a
@@ -390,6 +397,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
           allOrgans={organs}
           onSelectReference={setReferenceId}
           onSelectOrgan={selectOrgan}
+          onChangeModal={setModal}
           locale={locale.code}
           t={t}
           onStartLabelQuiz={() => { setModal(null); setQuizActive(true); }}
@@ -409,6 +417,7 @@ const MODAL_ICON: Record<Exclude<Modal, null>, string> = {
   inside: "🔬",
   profile: "MA",
   compare: "⚖",
+  notes: "📝",
 };
 
 function LearningModal({
@@ -418,6 +427,7 @@ function LearningModal({
   allOrgans,
   onSelectReference,
   onSelectOrgan,
+  onChangeModal,
   locale,
   t,
   onStartLabelQuiz,
@@ -429,6 +439,7 @@ function LearningModal({
   allOrgans?: Organ[];
   onSelectReference?: (id: OrganId) => void;
   onSelectOrgan?: (id: OrganId) => void;
+  onChangeModal?: (modal: Modal) => void;
   locale: string;
   t: UiDictionary;
   onStartLabelQuiz: () => void;
@@ -438,11 +449,102 @@ function LearningModal({
   const langKey = locale === "ru" ? "ru" : "en";
   const progress = useProgress();
 
+  // Active Organ selectors for Lesson & Notes
+  const [lessonOrganId, setLessonOrganId] = useState<OrganId>(organ.id);
+  const [notesOrganId, setNotesOrganId] = useState<OrganId>(organ.id);
+  const [notesTab, setNotesTab] = useState<"organ-note" | "all-notes" | "profile">(
+    type === "profile" ? "profile" : "organ-note"
+  );
+  const [saveIndicator, setSaveIndicator] = useState(false);
+
+  useEffect(() => {
+    setLessonOrganId(organ.id);
+    setNotesOrganId(organ.id);
+  }, [organ.id]);
+
+  useEffect(() => {
+    if (type === "profile") setNotesTab("profile");
+    else if (type === "notes") setNotesTab("organ-note");
+  }, [type]);
+
+  const activeLessonOrgan = allOrgans?.find((o) => o.id === lessonOrganId) ?? organ;
+  const activeNotesOrgan = allOrgans?.find((o) => o.id === notesOrganId) ?? organ;
+
   // Content data
   const organQuestions = quizBank[organ.id] ?? [];
-  const organLesson = (lessons[organ.id] as any)?.[langKey] ?? lessons[organ.id]?.en;
+  const curLesson = (lessons[lessonOrganId] as any)?.[langKey] ?? lessons[lessonOrganId]?.en;
   const organHisto = (histology[organ.id] as any)?.[langKey] ?? histology[organ.id]?.en;
   const organAnim = (functionAnimations[organ.id] as any)?.[langKey] ?? functionAnimations[organ.id]?.en;
+
+  // Lesson organ nav handlers
+  const organIndex = allOrgans ? allOrgans.findIndex((o) => o.id === lessonOrganId) : -1;
+  const handlePrevLessonOrgan = () => {
+    if (!allOrgans || allOrgans.length === 0) return;
+    const prevIdx = (organIndex - 1 + allOrgans.length) % allOrgans.length;
+    setLessonOrganId(allOrgans[prevIdx].id);
+  };
+  const handleNextLessonOrgan = () => {
+    if (!allOrgans || allOrgans.length === 0) return;
+    const nextIdx = (organIndex + 1) % allOrgans.length;
+    setLessonOrganId(allOrgans[nextIdx].id);
+  };
+
+  const isLessonComplete = (progress.lessons[lessonOrganId] ?? 0) > 0;
+
+  // Notes handlers
+  const currentNoteText = progress.notes[notesOrganId] ?? "";
+
+  const handleNoteChange = (text: string) => {
+    progressStore.setNote(notesOrganId, text);
+    setSaveIndicator(true);
+    setTimeout(() => setSaveIndicator(false), 1800);
+  };
+
+  const handleAppendPrompt = (prompt: string) => {
+    const existing = progress.notes[notesOrganId] ?? "";
+    const prefix = existing.trim() ? `${existing.trim()}\n\n` : "";
+    const next = `${prefix}• ${prompt}`;
+    progressStore.setNote(notesOrganId, next);
+    setSaveIndicator(true);
+    setTimeout(() => setSaveIndicator(false), 1800);
+  };
+
+  const handleClearNote = () => {
+    if (confirm(`Clear study notes for ${activeNotesOrgan.name}?`)) {
+      progressStore.setNote(notesOrganId, "");
+    }
+  };
+
+  const handleCopyNote = () => {
+    const note = progress.notes[notesOrganId] || "";
+    if (!note) return;
+    void navigator.clipboard?.writeText(note);
+    setSaveIndicator(true);
+    setTimeout(() => setSaveIndicator(false), 1800);
+  };
+
+  const handleExportAllNotes = () => {
+    const entries = Object.entries(progress.notes).filter(([_, text]) => Boolean(text?.trim()));
+    if (entries.length === 0) return;
+    let md = `# Anatomy Atelier — Clinical Study Journal\n\n`;
+    md += `*Exported on ${new Date().toLocaleDateString()}*\n\n---\n\n`;
+    entries.forEach(([id, text]) => {
+      const match = allOrgans?.find((o) => o.id === id);
+      const name = match ? match.name : id;
+      const sys = match ? match.system : "General";
+      const latin = match?.scientificName ? ` *(${match.scientificName})*` : "";
+      md += `### ${name}${latin}\n`;
+      md += `**System:** ${sys}\n\n`;
+      md += `${text}\n\n---\n\n`;
+    });
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `anatomy-notes-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Quiz state
   const [qIndex, setQIndex] = useState(0);
@@ -472,9 +574,10 @@ function LearningModal({
 
   const title =
     type === "quiz" ? `${organ.name} Theory Quiz`
-    : type === "lesson" ? `Anatomical Lesson: ${organ.name}`
+    : type === "lesson" ? `Anatomical Lesson: ${activeLessonOrgan.name}`
     : type === "animation" ? format(t.modal.motionTitle, vars)
     : type === "system" ? format(t.modal.bodyTitle, vars)
+    : type === "notes" ? "Clinical Study Notes"
     : type === "profile" ? "Learner Profile & Progress"
     : type === "compare" ? `Anatomical Comparison: ${organ.name} vs. ${reference?.name ?? "Reference"}`
     : format(t.modal.insideTitle, vars);
@@ -482,7 +585,7 @@ function LearningModal({
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <section
-        className={`learning-modal ${type === "compare" ? "modal-compare" : (type === "system" || type === "lesson" || type === "quiz" ? "wide" : "")}`}
+        className={`learning-modal ${type === "compare" || type === "lesson" || type === "notes" || type === "profile" ? "modal-compare" : (type === "system" || type === "quiz" ? "wide" : "")}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
@@ -499,6 +602,28 @@ function LearningModal({
             </h2>
             <p className="compare-lead">
               Cross-examination of functional, morphological, and clinical traits
+            </p>
+          </header>
+        ) : type === "lesson" ? (
+          <header className="compare-modal-header">
+            <span className="modal-icon lesson-icon">✦</span>
+            <em className="compare-eyebrow">Masterclass & Clinical Curriculum</em>
+            <h2 id="modal-title" className="compare-title">
+              {activeLessonOrgan.name} <span className="hero-system-pill" style={{ verticalAlign: "middle", fontSize: "12px", marginLeft: "6px" }}>{activeLessonOrgan.system}</span>
+            </h2>
+            <p className="compare-lead">
+              Systematic study of anatomical structure, physiological function, and clinical pathology
+            </p>
+          </header>
+        ) : type === "notes" || type === "profile" ? (
+          <header className="compare-modal-header">
+            <span className="modal-icon notes-icon">📝</span>
+            <em className="compare-eyebrow">Interactive Notebook & Study Metrics</em>
+            <h2 id="modal-title" className="compare-title">
+              Clinical Study Journal
+            </h2>
+            <p className="compare-lead">
+              Document observations, high-yield clinical pearls, and monitor curriculum progress
             </p>
           </header>
         ) : (
@@ -602,34 +727,204 @@ function LearningModal({
               </div>
             )}
           </div>
-        ) : type === "lesson" && organLesson ? (
-          <div className="lesson-container" style={{ textAlign: "left", width: "100%", maxHeight: "65vh", overflowY: "auto", paddingRight: "8px" }}>
-            <h3 style={{ marginTop: "0.5rem" }}>Learning Objectives</h3>
-            <ul>
-              {organLesson.objectives?.map((obj: string, i: number) => (
-                <li key={i} style={{ margin: "4px 0" }}>{obj}</li>
-              ))}
-            </ul>
-            <h3 style={{ marginTop: "1rem" }}>Anatomical Structure</h3>
-            <p style={{ lineHeight: 1.6 }}>{organLesson.structure}</p>
-            <h3 style={{ marginTop: "1rem" }}>Physiological Function</h3>
-            <p style={{ lineHeight: 1.6 }}>{organLesson.function}</p>
-            <h3 style={{ marginTop: "1rem" }}>Clinical Correlates</h3>
-            <ul>
-              {organLesson.clinical?.map((clin: string, i: number) => (
-                <li key={i} style={{ margin: "4px 0" }}>{clin}</li>
-              ))}
-            </ul>
-            {Array.isArray(organLesson.sources) && organLesson.sources.length > 0 && (
-              <>
-                <h3 style={{ marginTop: "1rem" }}>Literature & Canonical References</h3>
-                <ul>
-                  {organLesson.sources.map((src: string, i: number) => (
-                    <li key={i} style={{ margin: "4px 0", fontSize: "0.88rem", color: "var(--muted)" }}>{src}</li>
+        ) : type === "lesson" && curLesson ? (
+          <div className="lesson-master-deck">
+            {/* 1. Curriculum & Navigation Bar */}
+            <div className="lesson-curriculum-bar">
+              <div className="lesson-organ-selector-wrap">
+                <button
+                  type="button"
+                  className="lesson-nav-arrow"
+                  onClick={handlePrevLessonOrgan}
+                  title="Previous specimen"
+                  aria-label="Previous specimen"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                <div className="lesson-select-pill">
+                  <div className="lesson-thumb-mini">
+                    <OrganArt organ={activeLessonOrgan} asset="thumb" alt="" />
+                  </div>
+                  <select
+                    value={lessonOrganId}
+                    onChange={(e) => setLessonOrganId(e.target.value as OrganId)}
+                    className="lesson-organ-dropdown"
+                    aria-label="Select specimen lesson"
+                  >
+                    {allOrgans?.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.name} ({o.system})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="lesson-dropdown-chevron" />
+                </div>
+
+                <button
+                  type="button"
+                  className="lesson-nav-arrow"
+                  onClick={handleNextLessonOrgan}
+                  title="Next specimen"
+                  aria-label="Next specimen"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+
+              <div className="lesson-meta-badges">
+                <span className="lesson-pill-tag">{activeLessonOrgan.system}</span>
+                <span className="lesson-pill-time">
+                  <Clock size={12} /> ~4 min read
+                </span>
+                <button
+                  type="button"
+                  className={`lesson-status-pill ${isLessonComplete ? "completed" : ""}`}
+                  onClick={() => progressStore.markLesson(lessonOrganId)}
+                  title="Toggle completion status"
+                >
+                  <Check size={13} />
+                  <span>{isLessonComplete ? "Lesson Complete" : "Mark as Complete"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Scrollable Structured Lesson Cards */}
+            <div className="lesson-scroll-area">
+              {/* 2.1 Core Learning Objectives */}
+              <section className="lesson-card objectives-card">
+                <header className="lesson-card-header">
+                  <span className="lesson-step-badge">1</span>
+                  <h4>Core Learning Objectives</h4>
+                </header>
+                <ul className="lesson-objectives-list">
+                  {curLesson.objectives?.map((obj: string, i: number) => (
+                    <li key={i} className="objective-item">
+                      <span className="objective-num">0{i + 1}</span>
+                      <span>{obj}</span>
+                    </li>
                   ))}
                 </ul>
-              </>
-            )}
+              </section>
+
+              {/* 2.2 Anatomical Architecture */}
+              <section className="lesson-card structure-card">
+                <header className="lesson-card-header">
+                  <span className="lesson-step-badge">2</span>
+                  <h4>Anatomical Architecture & Morphology</h4>
+                </header>
+                <p className="lesson-body-prose">{curLesson.structure}</p>
+                <div className="lesson-metric-strip">
+                  <dl style={{ display: "contents" }}>
+                    <div>
+                      <dt>Tissue Type</dt>
+                      <dd>{activeLessonOrgan.tissue}</dd>
+                    </div>
+                    <div>
+                      <dt>Physical Dimensions</dt>
+                      <dd>{activeLessonOrgan.size}</dd>
+                    </div>
+                    <div>
+                      <dt>Specimen Mass</dt>
+                      <dd>{activeLessonOrgan.weight}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </section>
+
+              {/* 2.3 Physiological Function */}
+              <section className="lesson-card function-card">
+                <header className="lesson-card-header">
+                  <span className="lesson-step-badge">3</span>
+                  <h4>Physiological Mechanisms & Workload</h4>
+                </header>
+                <p className="lesson-body-prose">{curLesson.function}</p>
+                <div className="lesson-highlight-box">
+                  <strong>Vascular & Hemodynamic Supply:</strong> {activeLessonOrgan.bloodSupply}
+                </div>
+              </section>
+
+              {/* 2.4 Clinical Correlates */}
+              <section className="lesson-card clinical-card">
+                <header className="lesson-card-header">
+                  <span className="lesson-step-badge">4</span>
+                  <h4>Clinical Correlates & Pathology</h4>
+                </header>
+                <div className="clinical-cases-grid">
+                  {curLesson.clinical?.map((clin: string, i: number) => {
+                    const parts = clin.split(": ");
+                    const hasTitle = parts.length > 1;
+                    const heading = hasTitle ? parts[0] : `Clinical Scenario #${i + 1}`;
+                    const detail = hasTitle ? parts.slice(1).join(": ") : clin;
+                    return (
+                      <div key={i} className="clinical-case-item">
+                        <h5>
+                          <Stethoscope size={13} style={{ display: "inline-block", verticalAlign: "middle", marginRight: "6px" }} />
+                          {heading}
+                        </h5>
+                        <p>{detail}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+
+              {/* 2.5 Canonical Literature */}
+              {Array.isArray(curLesson.sources) && curLesson.sources.length > 0 && (
+                <section className="lesson-card sources-card">
+                  <header className="lesson-card-header">
+                    <span className="lesson-step-badge">5</span>
+                    <h4>Literature & Canonical References</h4>
+                  </header>
+                  <ul className="lesson-sources-list">
+                    {curLesson.sources.map((src: string, i: number) => (
+                      <li key={i}>• {src}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+            </div>
+
+            {/* 3. Action Footer */}
+            <div className="lesson-actions-footer">
+              <div className="lesson-footer-secondary">
+                <button
+                  type="button"
+                  className="lesson-secondary-btn"
+                  onClick={() => {
+                    onSelectOrgan?.(lessonOrganId);
+                    onChangeModal?.("quiz");
+                  }}
+                >
+                  <CircleHelp size={14} />
+                  <span>Practice Quiz</span>
+                </button>
+                <button
+                  type="button"
+                  className="lesson-secondary-btn"
+                  onClick={() => {
+                    setNotesOrganId(lessonOrganId);
+                    onChangeModal?.("notes");
+                  }}
+                >
+                  <NotebookPen size={14} />
+                  <span>Take Study Notes</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="lesson-inspect-btn"
+                onClick={() => {
+                  onSelectOrgan?.(lessonOrganId);
+                  onClose();
+                }}
+              >
+                <Eye size={15} />
+                <span>Inspect {activeLessonOrgan.name} in 3D</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
           </div>
         ) : type === "inside" ? (
           <>
@@ -866,19 +1161,301 @@ function LearningModal({
               </div>
             </div>
           </div>
-        ) : type === "profile" ? (
-          <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
-            <p><b>Organs Visited:</b> {Object.keys(progress.visited).length} / 30</p>
-            <p><b>Saved Bookmarks:</b> {progress.saved.length}</p>
-            <p><b>Quizzes Taken:</b> {Object.keys(progress.quiz).length}</p>
-            <button
-              type="button"
-              className="lesson-button"
-              onClick={() => progressStore.reset()}
-              style={{ marginTop: "1rem" }}
-            >
-              Reset Progress
-            </button>
+        ) : (type === "notes" || type === "profile") ? (
+          <div className="notes-master-deck">
+            {/* Tabs Bar */}
+            <div className="notes-tabs-bar">
+              <button
+                type="button"
+                className={`notes-tab-btn ${notesTab === "organ-note" ? "active" : ""}`}
+                onClick={() => setNotesTab("organ-note")}
+              >
+                <NotebookPen size={14} />
+                <span>Active Specimen Note</span>
+              </button>
+
+              <button
+                type="button"
+                className={`notes-tab-btn ${notesTab === "all-notes" ? "active" : ""}`}
+                onClick={() => setNotesTab("all-notes")}
+              >
+                <BookOpen size={14} />
+                <span>All Study Notes ({Object.keys(progress.notes).length})</span>
+              </button>
+
+              <button
+                type="button"
+                className={`notes-tab-btn ${notesTab === "profile" ? "active" : ""}`}
+                onClick={() => setNotesTab("profile")}
+              >
+                <Sparkles size={14} />
+                <span>Learner Profile & Stats</span>
+              </button>
+            </div>
+
+            {notesTab === "organ-note" ? (
+              <div className="notes-editor-deck">
+                {/* Organ Selector Header */}
+                <div className="notes-organ-bar">
+                  <div className="notes-organ-info">
+                    <div className="lesson-thumb-mini">
+                      <OrganArt organ={activeNotesOrgan} asset="thumb" alt="" />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: "14.5px" }}>{activeNotesOrgan.name}</div>
+                      <small style={{ color: "var(--muted)", fontStyle: "italic" }}>{activeNotesOrgan.scientificName}</small>
+                    </div>
+                  </div>
+
+                  <div className="notes-organ-select-wrap">
+                    <select
+                      value={notesOrganId}
+                      onChange={(e) => setNotesOrganId(e.target.value as OrganId)}
+                      className="hero-select"
+                      style={{ minWidth: "170px" }}
+                      aria-label="Choose organ to take notes"
+                    >
+                      {allOrgans?.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.name} ({o.system})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* High-Yield Prompts */}
+                <div className="notes-prompts-bar">
+                  <span className="prompts-label">
+                    <Sparkles size={12} /> High-Yield Prompts:
+                  </span>
+                  <button
+                    type="button"
+                    className="prompt-chip"
+                    onClick={() => handleAppendPrompt("Morphology & Landmarks: ")}
+                  >
+                    + Morphology
+                  </button>
+                  <button
+                    type="button"
+                    className="prompt-chip"
+                    onClick={() => handleAppendPrompt("Physiological Role & Blood Supply: ")}
+                  >
+                    + Physiology
+                  </button>
+                  <button
+                    type="button"
+                    className="prompt-chip"
+                    onClick={() => handleAppendPrompt("Clinical High-Yield Pearl: ")}
+                  >
+                    + Clinical Pearl
+                  </button>
+                  <button
+                    type="button"
+                    className="prompt-chip"
+                    onClick={() => handleAppendPrompt("Diagnostic Triad / Mnemonic: ")}
+                  >
+                    + Mnemonic
+                  </button>
+                </div>
+
+                {/* Text Area */}
+                <div className="notes-textarea-wrap">
+                  <textarea
+                    className="notes-textarea"
+                    value={currentNoteText}
+                    onChange={(e) => handleNoteChange(e.target.value)}
+                    placeholder={`Document your notes, diagnostic triads, or clinical observations for the ${activeNotesOrgan.name}...`}
+                    rows={8}
+                    aria-label={`Study notes for ${activeNotesOrgan.name}`}
+                  />
+                </div>
+
+                {/* Editor Footer */}
+                <div className="notes-editor-footer">
+                  <div className="notes-status-msg">
+                    {saveIndicator ? (
+                      <span className="saved-indicator">
+                        <Check size={13} /> Auto-saved to local notebook
+                      </span>
+                    ) : (
+                      <span className="idle-indicator">
+                        Persisted in browser storage
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="notes-editor-actions">
+                    {currentNoteText && (
+                      <button
+                        type="button"
+                        className="note-btn-clear"
+                        onClick={handleClearNote}
+                        title="Clear current note"
+                      >
+                        <Trash2 size={13} />
+                        <span>Clear</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="note-btn-copy"
+                      onClick={handleCopyNote}
+                      title="Copy note to clipboard"
+                    >
+                      <Copy size={13} />
+                      <span>Copy</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="note-btn-save"
+                      onClick={() => {
+                        setLessonOrganId(notesOrganId);
+                        onChangeModal?.("lesson");
+                      }}
+                    >
+                      <BookOpen size={13} />
+                      <span>Read Lesson</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : notesTab === "all-notes" ? (
+              <div className="notes-directory-deck">
+                <div className="notes-directory-header">
+                  <p>Saved anatomical & clinical notes across your study sessions.</p>
+                  {Object.keys(progress.notes).length > 0 && (
+                    <button
+                      type="button"
+                      className="notes-export-all-btn"
+                      onClick={handleExportAllNotes}
+                    >
+                      <Download size={13} />
+                      <span>Export All (.md)</span>
+                    </button>
+                  )}
+                </div>
+
+                {Object.entries(progress.notes).filter(([_, txt]) => Boolean(txt?.trim())).length === 0 ? (
+                  <div className="notes-empty-state">
+                    <span className="notes-empty-icon">📝</span>
+                    <h4>No study notes yet</h4>
+                    <p>
+                      Select any organ in the dropdown above or switch to the Active Specimen Note tab to start jotting down clinical pearls.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="all-notes-list">
+                    {Object.entries(progress.notes)
+                      .filter(([_, txt]) => Boolean(txt?.trim()))
+                      .map(([id, text]) => {
+                        const itemOrgan = allOrgans?.find((o) => o.id === id);
+                        return (
+                          <div key={id} className="saved-note-card">
+                            <div className="saved-note-header">
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <span style={{ fontWeight: 600, fontSize: "14.5px" }}>
+                                  {itemOrgan ? itemOrgan.name : id}
+                                </span>
+                                {itemOrgan && (
+                                  <span className="hero-system-pill" style={{ fontSize: "10px" }}>
+                                    {itemOrgan.system}
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ display: "flex", gap: "6px" }}>
+                                <button
+                                  type="button"
+                                  className="saved-note-action-btn primary"
+                                  onClick={() => {
+                                    setNotesOrganId(id as OrganId);
+                                    setNotesTab("organ-note");
+                                  }}
+                                >
+                                  Edit Note
+                                </button>
+                                <button
+                                  type="button"
+                                  className="saved-note-action-btn"
+                                  onClick={() => {
+                                    onSelectOrgan?.(id as OrganId);
+                                    onClose();
+                                  }}
+                                >
+                                  View in 3D
+                                </button>
+                              </div>
+                            </div>
+                            <div className="saved-note-text">{text}</div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="notes-profile-deck">
+                <div className="profile-metrics-grid">
+                  <div className="profile-stat-box">
+                    <span className="stat-number">{Object.keys(progress.visited).length} / 30</span>
+                    <span className="stat-label">Organs Explored</span>
+                  </div>
+                  <div className="profile-stat-box">
+                    <span className="stat-number">{Object.keys(progress.lessons).length} / 30</span>
+                    <span className="stat-label">Lessons Completed</span>
+                  </div>
+                  <div className="profile-stat-box">
+                    <span className="stat-number">{Object.keys(progress.notes).length}</span>
+                    <span className="stat-label">Notes Authored</span>
+                  </div>
+                  <div className="profile-stat-box">
+                    <span className="stat-number">{progress.saved.length}</span>
+                    <span className="stat-label">Bookmarked</span>
+                  </div>
+                </div>
+
+                <div className="profile-quiz-history">
+                  <h4>Quiz Performance History ({Object.keys(progress.quiz).length} records)</h4>
+                  {Object.keys(progress.quiz).length === 0 ? (
+                    <p style={{ color: "var(--muted)", fontStyle: "italic", fontSize: "13px" }}>
+                      No theory quizzes taken yet. Test your knowledge on any organ from its lesson or quiz view.
+                    </p>
+                  ) : (
+                    <div className="quiz-records-table">
+                      {Object.entries(progress.quiz).map(([id, qp]) => {
+                        const item = allOrgans?.find((o) => o.id === id);
+                        return (
+                          <div key={id} className="quiz-record-row">
+                            <span className="record-organ">{item?.name ?? id}</span>
+                            <span className="record-score">
+                              Best: {qp.best} / {qp.total} ({Math.round((qp.best / qp.total) * 100)}%)
+                            </span>
+                            <span className="record-attempts">
+                              {qp.attempts} attempt{qp.attempts > 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ paddingTop: "12px", borderTop: "1px solid var(--line)", display: "flex", justifyContent: "flex-end" }}>
+                  <button
+                    type="button"
+                    className="note-btn-clear"
+                    onClick={() => {
+                      if (confirm("Reset all learning progress, quiz scores, and study notes?")) {
+                        progressStore.reset();
+                      }
+                    }}
+                  >
+                    <RotateCcw size={13} />
+                    <span>Reset All Progress</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : type === "system" ? (
           <>
