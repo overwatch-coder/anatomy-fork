@@ -23,6 +23,7 @@ import {
   Search,
   Share2,
   Sparkles,
+  SplitSquareVertical,
   Stethoscope,
   X,
 } from "lucide-react";
@@ -38,7 +39,7 @@ import { histology } from "../lib/content/histology";
 import { functionAnimations } from "../lib/content/animations";
 import { progressStore, useProgress } from "../lib/progress";
 
-type Modal = "lesson" | "quiz" | "animation" | "system" | "inside" | "profile" | null;
+type Modal = "lesson" | "quiz" | "animation" | "system" | "inside" | "profile" | "compare" | null;
 
 /**
  * Renders an organ illustration, or its accent glyph for organs that ship as a
@@ -89,8 +90,10 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
   const progress = useProgress();
 
   const [organId, setOrganId] = useState<OrganId>("heart");
+  const [referenceId, setReferenceId] = useState<OrganId>("brain");
   const [autoRotate, setAutoRotate] = useState(true);
   const [compare, setCompare] = useState(false);
+  const [animate, setAnimate] = useState(false);
   const [modal, setModal] = useState<Modal>(null);
   const [query, setQuery] = useState("");
   const [mobileLibrary, setMobileLibrary] = useState(false);
@@ -99,7 +102,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
   const contentRef = useRef<HTMLDivElement>(null);
   const prefetched = useRef(new Set<OrganId>());
   const organ = organById[organId] ?? organs[0];
-  const reference = organById[organId === "heart" ? "brain" : "heart"] ?? organs[1];
+  const reference = organById[referenceId === organId ? (organId === "heart" ? "brain" : "heart") : referenceId] ?? organs[1];
 
   // Pick up organ from URL query if navigated from systems or external links
   useEffect(() => {
@@ -143,8 +146,11 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
       });
     }
     setOrganId(id);
+    if (referenceId === id) {
+      setReferenceId(id === "heart" ? "brain" : "heart");
+    }
     setMobileLibrary(false);
-    setCompare(false);
+    setAnimate(false);
     setQuizActive(false);
   };
 
@@ -239,6 +245,8 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
           onAutoRotate={setAutoRotate}
           compare={compare}
           onCompare={() => setCompare(!compare)}
+          animate={animate}
+          onAnimateChange={setAnimate}
           quizActive={quizActive}
           onQuizExit={() => setQuizActive(false)}
         />
@@ -276,7 +284,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
           <div className="fun-note" data-reveal><Sparkles size={15} /><p><b>{t.info.didYouKnow}</b>{organ.funFact}</p></div>
           <button className="lesson-button" data-reveal onClick={() => setModal("lesson")}>{t.info.viewLesson} <ArrowRight size={16} /></button>
           <div className="action-grid" data-reveal>
-            <button onClick={() => setModal("animation")}><Play size={15} /> {t.info.animate}</button>
+            <button onClick={() => setAnimate(!animate)} className={animate ? "active" : ""}><Play size={15} /> {t.info.animate}</button>
             <button onClick={() => { setQuizActive(true); setModal(null); }}><CircleHelp size={15} /> {t.info.quiz}</button>
             <button onClick={() => setCompare(!compare)} className={compare ? "active" : ""}><Share2 size={15} /> {t.info.compare}</button>
           </div>
@@ -285,10 +293,50 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
 
       {compare && (
         <section className="compare-strip" aria-label={t.compare.title}>
-          <div className="compare-organ"><OrganArt organ={organ} asset="thumb" alt="" /><span>{t.compare.comparing}</span><strong>{organ.name}</strong><small>{organ.system}</small></div>
+          <div className="compare-organ">
+            <OrganArt organ={organ} asset="thumb" alt="" />
+            <span>{t.compare.comparing}</span>
+            <strong>{organ.name}</strong>
+            <small>{organ.system}</small>
+          </div>
           <b>{t.compare.vs}</b>
-          <div className="compare-organ"><OrganArt organ={reference} asset="thumb" alt="" /><span>{t.compare.reference}</span><strong>{reference.name}</strong><small>{reference.system}</small></div>
-          <dl><div><dt>{t.compare.primaryRole}</dt><dd><Measure>{organ.function}</Measure></dd></div><div><dt>{t.compare.scale}</dt><dd><Measure>{organ.size}</Measure></dd></div></dl>
+          <div className="compare-organ">
+            <OrganArt organ={reference} asset="thumb" alt="" />
+            <span>{t.compare.reference}</span>
+            <select
+              value={reference.id}
+              onChange={(e) => setReferenceId(e.target.value as OrganId)}
+              aria-label="Select reference organ"
+            >
+              {organs.filter((o) => o.id !== organ.id).map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name} ({o.system})
+                </option>
+              ))}
+            </select>
+          </div>
+          <dl>
+            <div>
+              <dt>{t.compare.primaryRole}</dt>
+              <dd>
+                <b>{organ.name}:</b> <Measure>{organ.function}</Measure><br />
+                <b>{reference.name}:</b> <Measure>{reference.function}</Measure>
+              </dd>
+            </div>
+            <div>
+              <dt>{t.compare.scale}</dt>
+              <dd>
+                <b>{organ.name}:</b> <Measure>{organ.size}</Measure><br />
+                <b>{reference.name}:</b> <Measure>{reference.size}</Measure>
+              </dd>
+            </div>
+          </dl>
+          <button type="button" className="compare-full" onClick={() => setModal("compare")} title="View full comparison table">
+            <SplitSquareVertical size={13} /> Full Table
+          </button>
+          <button type="button" className="compare-full" onClick={() => selectOrgan(reference.id)} title="Swap 3D view to reference organ">
+            Swap to 3D
+          </button>
           <button onClick={() => setCompare(false)} aria-label={t.compare.close}><X size={16} /></button>
         </section>
       )}
@@ -303,23 +351,25 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
           <button onClick={() => setModal("inside")}>{t.cards.exploreTissue} <ArrowRight size={14} /></button>
         </article>
         <article>
-          <header><div><em>{t.cards.compareOrgans}</em><h3>{organ.comparison}</h3></div><Share2 size={17} /></header>
+          <header><div><em>{t.cards.compareOrgans}</em><h3>{organ.name} vs. {reference.name}</h3></div><Share2 size={17} /></header>
           <div className="comparison-visual organ-card-image"><OrganArt organ={organ} asset="compare" alt="" /></div>
-          <button onClick={() => setCompare(true)}>{t.cards.openComparison} <ArrowRight size={14} /></button>
+          <button onClick={() => { setCompare(true); setModal("compare"); }}>Full Comparison Table <ArrowRight size={14} /></button>
         </article>
         <article>
           <header><div><em>{t.cards.functionAnimation}</em><h3>{organ.function}</h3></div><Play size={17} /></header>
           <button
             type="button"
             className="function-visual organ-card-image"
-            onClick={() => setModal("animation")}
+            onClick={() => setAnimate(!animate)}
             aria-label={format(t.cards.playAria, { organ: organ.name })}
           >
             <OrganArt organ={organ} asset="organ" alt="" />
             <i className="function-pulse" />
             <span className="play-badge"><Play size={18} fill="currentColor" /></span>
           </button>
-          <button onClick={() => setModal("animation")}>{t.cards.playAnimation} <ArrowRight size={14} /></button>
+          <button onClick={() => setAnimate(!animate)}>
+            {animate ? "Stop motion" : t.cards.playAnimation} <ArrowRight size={14} />
+          </button>
         </article>
         <article>
           <header><div><em>{t.cards.clinicalNotes}</em><h3>{t.cards.commonConditions}</h3></div><FileText size={17} /></header>
@@ -344,6 +394,10 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         <LearningModal
           type={modal}
           organ={organ}
+          reference={reference}
+          allOrgans={organs}
+          onSelectReference={setReferenceId}
+          onSelectOrgan={selectOrgan}
           locale={locale.code}
           t={t}
           onStartLabelQuiz={() => { setModal(null); setQuizActive(true); }}
@@ -362,11 +416,16 @@ const MODAL_ICON: Record<Exclude<Modal, null>, string> = {
   lesson: "✦",
   inside: "🔬",
   profile: "MA",
+  compare: "⚖",
 };
 
 function LearningModal({
   type,
   organ,
+  reference,
+  allOrgans,
+  onSelectReference,
+  onSelectOrgan,
   locale,
   t,
   onStartLabelQuiz,
@@ -374,6 +433,10 @@ function LearningModal({
 }: {
   type: Exclude<Modal, null>;
   organ: Organ;
+  reference?: Organ;
+  allOrgans?: Organ[];
+  onSelectReference?: (id: OrganId) => void;
+  onSelectOrgan?: (id: OrganId) => void;
   locale: string;
   t: UiDictionary;
   onStartLabelQuiz: () => void;
@@ -421,12 +484,13 @@ function LearningModal({
     : type === "animation" ? format(t.modal.motionTitle, vars)
     : type === "system" ? format(t.modal.bodyTitle, vars)
     : type === "profile" ? "Learner Profile & Progress"
+    : type === "compare" ? `Anatomical Comparison: ${organ.name} vs. ${reference?.name ?? "Reference"}`
     : format(t.modal.insideTitle, vars);
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <section
-        className={`learning-modal ${type === "system" || type === "lesson" || type === "quiz" ? "wide" : ""}`}
+        className={`learning-modal ${type === "system" || type === "lesson" || type === "quiz" || type === "compare" ? "wide" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
@@ -601,6 +665,121 @@ function LearningModal({
               </div>
             )}
           </>
+        ) : type === "compare" && reference ? (
+          <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px", padding: "14px 16px", background: "rgba(0,0,0,0.02)", borderRadius: "14px", border: "1px solid var(--line)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span className="specimen-stamp" style={{ width: "44px", height: "44px" }}>
+                  <OrganArt organ={organ} asset="thumb" alt="" />
+                </span>
+                <div>
+                  <strong style={{ fontSize: "16px", display: "block" }}>{organ.name}</strong>
+                  <small style={{ color: "var(--muted)", textTransform: "uppercase", fontSize: "10px" }}>{organ.system}</small>
+                </div>
+              </div>
+
+              <b style={{ fontStyle: "italic", color: "var(--coral)", fontSize: "18px" }}>VS</b>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span className="specimen-stamp" style={{ width: "44px", height: "44px" }}>
+                  <OrganArt organ={reference} asset="thumb" alt="" />
+                </span>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ fontSize: "11px", color: "var(--muted)" }}>Compare with:</span>
+                    <select
+                      value={reference.id}
+                      onChange={(e) => onSelectReference?.(e.target.value as OrganId)}
+                      style={{ padding: "4px 8px", borderRadius: "8px", border: "1px solid var(--line)", background: "#fff", fontSize: "13px" }}
+                    >
+                      {allOrgans?.filter((o) => o.id !== organ.id).map((o) => (
+                        <option key={o.id} value={o.id}>{o.name} ({o.system})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <small style={{ color: "var(--muted)", textTransform: "uppercase", fontSize: "10px" }}>{reference.system}</small>
+                </div>
+              </div>
+            </div>
+
+            <div className="compare-table-wrap">
+              <table className="compare-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "22%" }}>Anatomical Metric</th>
+                    <th style={{ width: "39%" }}>{organ.name}</th>
+                    <th style={{ width: "39%" }}>{reference.name}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>Organ System</th>
+                    <td><b>{organ.system}</b></td>
+                    <td><b>{reference.system}</b></td>
+                  </tr>
+                  <tr>
+                    <th>Scientific Term (TA2)</th>
+                    <td><em>{organ.scientificName}</em></td>
+                    <td><em>{reference.scientificName}</em></td>
+                  </tr>
+                  <tr>
+                    <th>Primary Function</th>
+                    <td>{organ.function}</td>
+                    <td>{reference.function}</td>
+                  </tr>
+                  <tr>
+                    <th>Physical Scale / Size</th>
+                    <td>{organ.size}</td>
+                    <td>{reference.size}</td>
+                  </tr>
+                  <tr>
+                    <th>Typical Weight</th>
+                    <td>{organ.weight}</td>
+                    <td>{reference.weight}</td>
+                  </tr>
+                  <tr>
+                    <th>Daily Activity / Output</th>
+                    <td>{organ.dailyFact}</td>
+                    <td>{reference.dailyFact}</td>
+                  </tr>
+                  <tr>
+                    <th>Blood Supply</th>
+                    <td>{organ.bloodSupply}</td>
+                    <td>{reference.bloodSupply}</td>
+                  </tr>
+                  <tr>
+                    <th>Tissue Structure</th>
+                    <td>{organ.tissue}</td>
+                    <td>{reference.tissue}</td>
+                  </tr>
+                  <tr>
+                    <th>Medical Relevance</th>
+                    <td>{organ.medical}</td>
+                    <td>{reference.medical}</td>
+                  </tr>
+                  <tr>
+                    <th>Common Conditions</th>
+                    <td>{organ.conditions?.slice(0, 5).join(", ") || "—"}</td>
+                    <td>{reference.conditions?.slice(0, 5).join(", ") || "—"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", marginTop: "1.2rem", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                className="lesson-button"
+                style={{ width: "auto", padding: "0 18px", background: "var(--lavender)", color: "#fff" }}
+                onClick={() => {
+                  onSelectOrgan?.(reference.id);
+                  onClose();
+                }}
+              >
+                Inspect {reference.name} in 3D <ArrowRight size={15} />
+              </button>
+            </div>
+          </div>
         ) : type === "profile" ? (
           <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
             <p><b>Organs Visited:</b> {Object.keys(progress.visited).length} / 30</p>

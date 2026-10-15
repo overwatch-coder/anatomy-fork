@@ -7,6 +7,7 @@ import {
   Grid2x2,
   Layers3,
   Maximize2,
+  Play,
   RotateCcw,
   Search,
   Check,
@@ -17,6 +18,7 @@ import {
 import type { Hotspot, Organ } from "../i18n/merge";
 import { format, type UiDictionary } from "../i18n/types";
 import type { AnatomyViewer, SectionAxis } from "../lib/three/viewer";
+import { functionAnimations } from "../lib/content/animations";
 import { SectionControls } from "./SectionControls";
 
 const SECTION_DEFAULTS = { axis: "free" as SectionAxis, depth: 0, flipped: false, showPlane: true };
@@ -28,6 +30,8 @@ type Props = {
   onAutoRotate: (enabled: boolean) => void;
   compare: boolean;
   onCompare: () => void;
+  animate: boolean;
+  onAnimateChange: (enabled: boolean) => void;
   quizActive: boolean;
   onQuizExit: () => void;
 };
@@ -165,11 +169,12 @@ function useAuthoringFlag() {
   );
 }
 
-export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit }: Props) {
+export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, animate, onAnimateChange, quizActive, onQuizExit }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<AnatomyViewer | null>(null);
   const organRef = useRef(organ);
   const autoRotateRef = useRef(autoRotate);
+  const animateRef = useRef(animate);
   const canvasLabelRef = useRef(t.viewer.canvas);
   const [selected, setSelected] = useState<Hotspot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -212,6 +217,10 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   }, [autoRotate]);
 
   useEffect(() => {
+    animateRef.current = animate;
+  }, [animate]);
+
+  useEffect(() => {
     canvasLabelRef.current = t.viewer.canvas;
     viewerRef.current?.setCanvasLabel(t.viewer.canvas);
   }, [t.viewer.canvas]);
@@ -237,10 +246,11 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       viewer.setAutoRotate(autoRotateRef.current);
       viewer.setAuthoring(authoringRef.current);
       const current = organRef.current;
-      viewer.setOrgan(current.model, current.hotspots, current.accent).catch(() => {
+      viewer.setOrgan(current.model, current.hotspots, current.accent, current.id).catch(() => {
         setLoading(false);
         setProgress(0);
       });
+      viewer.setFunctionAnimation(animateRef.current);
     });
 
     return () => {
@@ -251,7 +261,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   }, []);
 
   useEffect(() => {
-    viewerRef.current?.setOrgan(organ.model, organ.hotspots, organ.accent).catch(() => {
+    viewerRef.current?.setOrgan(organ.model, organ.hotspots, organ.accent, organ.id).catch(() => {
       setLoading(false);
       setProgress(0);
     });
@@ -262,6 +272,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   useEffect(() => viewerRef.current?.setAutoRotate(autoRotate && !quizActive), [autoRotate, quizActive]);
   useEffect(() => viewerRef.current?.setQuizMode(quizActive), [quizActive]);
   useEffect(() => viewerRef.current?.setAuthoring(authoring), [authoring]);
+  useEffect(() => viewerRef.current?.setFunctionAnimation(animate), [animate]);
 
 
   // The viewer drives the callout's position directly, so a spinning model
@@ -360,6 +371,16 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
           onFlip={handleFlip}
           onShowPlane={handleShowPlane}
         />
+      )}
+
+      {animate && !quizActive && (
+        <div className="function-chip" role="status">
+          <span><Play size={13} fill="currentColor" /> {(functionAnimations[organ.id as keyof typeof functionAnimations] as any)?.en?.label ?? "Physiological Motion"}</span>
+          <small>{(functionAnimations[organ.id as keyof typeof functionAnimations] as any)?.en?.desc ?? "Real-time procedural simulation"}</small>
+          <button type="button" onClick={() => onAnimateChange(false)} aria-label="Stop animation">
+            <X size={14} />
+          </button>
+        </div>
       )}
 
       {!quizActive && (
