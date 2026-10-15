@@ -83,7 +83,7 @@ function Measure({ children }: { children: string }) {
   return <bdi dir={/^[\d(]/.test(children.trim()) ? "ltr" : "auto"}>{children}</bdi>;
 }
 
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { AppHeader } from "./AppHeader";
 
 export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dictionary: Dictionary }) {
   const t = dictionary.ui;
@@ -164,34 +164,18 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <button className="brand" type="button" onClick={() => selectOrgan("heart")} aria-label={t.brand.home}>
-          <strong>Anatomy Atelier<sup>✦</sup></strong>
-          <em>{t.brand.tagline}</em>
-        </button>
-        <nav className="main-nav" aria-label="Primary navigation">
-          <button className="active"><Compass size={17} /> {t.nav.explore}</button>
-          <Link href={`/${locale.code}/systems`} style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none", color: "inherit" }}>
-            <BrainCircuit size={17} /> {t.nav.systems}
-          </Link>
-          <button onClick={() => setModal("lesson")}><BookOpen size={17} /> {t.nav.lessons}</button>
-          <button onClick={() => setShowSavedOnly((s) => !s)} className={showSavedOnly ? "active" : ""}>
-            <LibraryBig size={17} /> {t.nav.library}
-          </button>
-          <button onClick={() => setModal("profile")}><NotebookPen size={17} /> {t.nav.notes}</button>
-        </nav>
-        <label className="search-box">
-          <Search size={17} />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search.placeholder} />
-        </label>
-        <LanguageSwitcher locale={locale} t={t} />
-        <button className="profile" onClick={() => setModal("profile")} aria-label={t.profile.open}>
-          <span>MA</span><ChevronDown size={15} />
-        </button>
-        <button className="mobile-library-trigger" onClick={() => setMobileLibrary(true)} aria-label={t.library.open}>
-          <LibraryBig size={20} />
-        </button>
-      </header>
+      <AppHeader
+        locale={locale}
+        t={t}
+        activePage="explore"
+        onBrandClick={() => selectOrgan("heart")}
+        onOpenModal={(modalType) => setModal(modalType as Modal)}
+        onToggleSaved={() => setShowSavedOnly((s) => !s)}
+        showSavedOnly={showSavedOnly}
+        onOpenLibrary={() => setMobileLibrary(true)}
+        searchQuery={query}
+        onSearchChange={setQuery}
+      />
 
       <div className="workspace">
         <aside className={`organ-library ${mobileLibrary ? "open" : ""}`}>

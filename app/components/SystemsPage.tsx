@@ -5,19 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  BookOpen,
-  BrainCircuit,
-  ChevronDown,
-  Compass,
-  LibraryBig,
-  NotebookPen,
   Sparkles,
 } from "lucide-react";
 import { organById } from "../lib/anatomy-data";
 import { localizeOrgan } from "../lib/anatomy-ru";
 import { bodySystems, systemById } from "../lib/content/systems";
 import { BodyFigure, SYSTEM_COLORS } from "./BodyFigure";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { AppHeader } from "./AppHeader";
 import type { UiDictionary } from "../i18n/types";
 
 /** Full-page overview of the twelve body systems with an interactive figure. */
@@ -47,23 +41,7 @@ export function SystemsPage({
 
   return (
     <main className="systems-page">
-      <header className="topbar topbar-slim">
-        <Link className="brand" href={`/${locale}`} aria-label={t?.brand?.home ?? "Anatomy Atelier home"}>
-          <strong>Anatomy Atelier<sup>✦</sup></strong>
-          <em>{t?.brand?.tagline ?? "Learn anatomy like an artist"}</em>
-        </Link>
-        <nav className="main-nav" aria-label="Primary navigation">
-          <Link href={`/${locale}`}><Compass size={17} /> {t?.nav?.explore ?? "Explore"}</Link>
-          <Link href={`/${locale}/systems`} className="active"><BrainCircuit size={17} /> {t?.nav?.systems ?? "Systems"}</Link>
-          <Link href={`/${locale}?modal=lesson`}><BookOpen size={17} /> {t?.nav?.lessons ?? "Lessons"}</Link>
-          <Link href={`/${locale}?modal=profile`}><LibraryBig size={17} /> {t?.nav?.library ?? "Library"}</Link>
-          <Link href={`/${locale}?modal=notes`}><NotebookPen size={17} /> {t?.nav?.notes ?? "Notes"}</Link>
-        </nav>
-        {t && <LanguageSwitcher locale={locale} t={t} />}
-        <Link className="profile" href={`/${locale}?modal=profile`} aria-label={t?.profile?.open ?? "Profile"}>
-          <span>MA</span><ChevronDown size={15} />
-        </Link>
-      </header>
+      <AppHeader locale={locale} t={t} activePage="systems" />
 
       <div className="systems-hero">
         <h1>{t?.nav?.systems ?? "Body Systems"}</h1>
