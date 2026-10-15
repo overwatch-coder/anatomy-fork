@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import {
+  ArrowLeftRight,
   ArrowRight,
   BookOpen,
   Bookmark,
@@ -12,6 +13,7 @@ import {
   ChevronDown,
   CircleHelp,
   Compass,
+  Eye,
   FileText,
   Globe,
   Heart,
@@ -291,7 +293,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         </aside>
       </div>
 
-      {compare && (
+      {compare && reference && (
         <section className="compare-strip" aria-label={t.compare.title}>
           <div className="compare-organ">
             <OrganArt organ={organ} asset="thumb" alt="" />
@@ -299,21 +301,25 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
             <strong>{organ.name}</strong>
             <small>{organ.system}</small>
           </div>
-          <b>{t.compare.vs}</b>
+          <b className="compare-strip-vs">{t.compare.vs}</b>
           <div className="compare-organ">
             <OrganArt organ={reference} asset="thumb" alt="" />
             <span>{t.compare.reference}</span>
-            <select
-              value={reference.id}
-              onChange={(e) => setReferenceId(e.target.value as OrganId)}
-              aria-label="Select reference organ"
-            >
-              {organs.filter((o) => o.id !== organ.id).map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name} ({o.system})
-                </option>
-              ))}
-            </select>
+            <div className="compare-strip-select-wrap">
+              <select
+                value={reference.id}
+                onChange={(e) => setReferenceId(e.target.value as OrganId)}
+                className="compare-strip-select"
+                aria-label="Select reference organ"
+              >
+                {organs.filter((o) => o.id !== organ.id).map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name} ({o.system})
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="compare-strip-select-arrow" />
+            </div>
           </div>
           <dl>
             <div>
@@ -331,13 +337,15 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
               </dd>
             </div>
           </dl>
-          <button type="button" className="compare-full" onClick={() => setModal("compare")} title="View full comparison table">
-            <SplitSquareVertical size={13} /> Full Table
-          </button>
-          <button type="button" className="compare-full" onClick={() => selectOrgan(reference.id)} title="Swap 3D view to reference organ">
-            Swap to 3D
-          </button>
-          <button onClick={() => setCompare(false)} aria-label={t.compare.close}><X size={16} /></button>
+          <div className="compare-strip-actions">
+            <button type="button" className="compare-full" onClick={() => setModal("compare")} title="View full comparison table">
+              <SplitSquareVertical size={13} /> Full Table
+            </button>
+            <button type="button" className="compare-full" onClick={() => selectOrgan(reference.id)} title="Swap 3D view to reference organ">
+              Swap to 3D
+            </button>
+          </div>
+          <button onClick={() => setCompare(false)} aria-label={t.compare.close} className="compare-strip-close"><X size={16} /></button>
         </section>
       )}
 
@@ -490,16 +498,32 @@ function LearningModal({
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <section
-        className={`learning-modal ${type === "system" || type === "lesson" || type === "quiz" || type === "compare" ? "wide" : ""}`}
+        className={`learning-modal ${type === "compare" ? "modal-compare" : (type === "system" || type === "lesson" || type === "quiz" ? "wide" : "")}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <button className="modal-close" onClick={onClose} aria-label={t.modal.close}><X size={18} /></button>
-        <span className="modal-icon">{MODAL_ICON[type]}</span>
-        <em>{t.modal.guided}</em>
-        <h2 id="modal-title">{title}</h2>
+
+        {type === "compare" && reference ? (
+          <header className="compare-modal-header">
+            <span className="modal-icon compare-icon">⚖</span>
+            <em className="compare-eyebrow">Comparative Anatomy & Physiology</em>
+            <h2 id="modal-title" className="compare-title">
+              {organ.name} <span className="compare-vs-pill">vs</span> {reference.name}
+            </h2>
+            <p className="compare-lead">
+              Cross-examination of functional, morphological, and clinical traits
+            </p>
+          </header>
+        ) : (
+          <>
+            <span className="modal-icon">{MODAL_ICON[type]}</span>
+            <em>{t.modal.guided}</em>
+            <h2 id="modal-title">{title}</h2>
+          </>
+        )}
 
         {type === "quiz" ? (
           <div className="quiz-container" style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
@@ -666,118 +690,196 @@ function LearningModal({
             )}
           </>
         ) : type === "compare" && reference ? (
-          <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px", padding: "14px 16px", background: "rgba(0,0,0,0.02)", borderRadius: "14px", border: "1px solid var(--line)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span className="specimen-stamp" style={{ width: "44px", height: "44px" }}>
-                  <OrganArt organ={organ} asset="thumb" alt="" />
-                </span>
-                <div>
-                  <strong style={{ fontSize: "16px", display: "block" }}>{organ.name}</strong>
-                  <small style={{ color: "var(--muted)", textTransform: "uppercase", fontSize: "10px" }}>{organ.system}</small>
+          <div className="compare-content-wrap">
+            {/* 1. Dual Specimen Hero Deck */}
+            <div className="compare-hero-deck">
+              {/* Primary Active Organ */}
+              <div className="compare-hero-card primary">
+                <div className="hero-card-meta">
+                  <span className="hero-badge primary-badge">Active Model</span>
+                  <span className="hero-system-pill">{organ.system}</span>
+                </div>
+                <div className="hero-card-main">
+                  <div className="hero-stamp primary-stamp">
+                    <OrganArt organ={organ} asset="thumb" alt="" />
+                  </div>
+                  <div className="hero-details">
+                    <h3 className="hero-organ-name">{organ.name}</h3>
+                    <em className="hero-scientific">{organ.scientificName}</em>
+                  </div>
                 </div>
               </div>
 
-              <b style={{ fontStyle: "italic", color: "var(--coral)", fontSize: "18px" }}>VS</b>
+              {/* Center VS Connector with Quick Swap */}
+              <div className="compare-vs-connector">
+                <div className="compare-vs-circle">VS</div>
+                {onSelectOrgan && (
+                  <button
+                    type="button"
+                    className="compare-swap-icon-btn"
+                    onClick={() => {
+                      onSelectOrgan(reference.id);
+                      onSelectReference?.(organ.id);
+                    }}
+                    title="Swap active and reference organs"
+                    aria-label="Swap active and reference organs"
+                  >
+                    <ArrowLeftRight size={13} />
+                    <span>Swap</span>
+                  </button>
+                )}
+              </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span className="specimen-stamp" style={{ width: "44px", height: "44px" }}>
-                  <OrganArt organ={reference} asset="thumb" alt="" />
-                </span>
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ fontSize: "11px", color: "var(--muted)" }}>Compare with:</span>
-                    <select
-                      value={reference.id}
-                      onChange={(e) => onSelectReference?.(e.target.value as OrganId)}
-                      style={{ padding: "4px 8px", borderRadius: "8px", border: "1px solid var(--line)", background: "#fff", fontSize: "13px" }}
-                    >
-                      {allOrgans?.filter((o) => o.id !== organ.id).map((o) => (
-                        <option key={o.id} value={o.id}>{o.name} ({o.system})</option>
-                      ))}
-                    </select>
+              {/* Target Reference Organ */}
+              <div className="compare-hero-card reference">
+                <div className="hero-card-meta">
+                  <span className="hero-badge ref-badge">Target Reference</span>
+                  <span className="hero-system-pill ref-pill">{reference.system}</span>
+                </div>
+                <div className="hero-card-main">
+                  <div className="hero-stamp ref-stamp">
+                    <OrganArt organ={reference} asset="thumb" alt="" />
                   </div>
-                  <small style={{ color: "var(--muted)", textTransform: "uppercase", fontSize: "10px" }}>{reference.system}</small>
+                  <div className="hero-details">
+                    <div className="hero-select-wrap">
+                      <select
+                        value={reference.id}
+                        onChange={(e) => onSelectReference?.(e.target.value as OrganId)}
+                        className="hero-select"
+                        aria-label="Choose reference organ to compare"
+                      >
+                        {allOrgans?.filter((o) => o.id !== organ.id).map((o) => (
+                          <option key={o.id} value={o.id}>
+                            {o.name} ({o.system})
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="hero-select-chevron" />
+                    </div>
+                    <em className="hero-scientific">{reference.scientificName}</em>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="compare-table-wrap">
-              <table className="compare-table">
+            {/* 2. Structured Comparison Matrix */}
+            <div className="compare-matrix-card">
+              <table className="compare-matrix-table">
                 <thead>
                   <tr>
-                    <th style={{ width: "22%" }}>Anatomical Metric</th>
-                    <th style={{ width: "39%" }}>{organ.name}</th>
-                    <th style={{ width: "39%" }}>{reference.name}</th>
+                    <th className="col-metric">Anatomical Metric</th>
+                    <th className="col-organ primary-col">
+                      <span className="col-dot primary-dot" />
+                      <span>{organ.name}</span>
+                    </th>
+                    <th className="col-organ ref-col">
+                      <span className="col-dot ref-dot" />
+                      <span>{reference.name}</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <th>Organ System</th>
-                    <td><b>{organ.system}</b></td>
-                    <td><b>{reference.system}</b></td>
+                    <td><span className="metric-tag primary-tag">{organ.system}</span></td>
+                    <td><span className="metric-tag ref-tag">{reference.system}</span></td>
                   </tr>
                   <tr>
                     <th>Scientific Term (TA2)</th>
-                    <td><em>{organ.scientificName}</em></td>
-                    <td><em>{reference.scientificName}</em></td>
+                    <td><em className="latin-name">{organ.scientificName}</em></td>
+                    <td><em className="latin-name">{reference.scientificName}</em></td>
                   </tr>
                   <tr>
                     <th>Primary Function</th>
-                    <td>{organ.function}</td>
-                    <td>{reference.function}</td>
+                    <td className="desc-text">{organ.function}</td>
+                    <td className="desc-text">{reference.function}</td>
                   </tr>
                   <tr>
-                    <th>Physical Scale / Size</th>
-                    <td>{organ.size}</td>
-                    <td>{reference.size}</td>
+                    <th>Physical Scale</th>
+                    <td className="val-text"><strong>{organ.size}</strong></td>
+                    <td className="val-text"><strong>{reference.size}</strong></td>
                   </tr>
                   <tr>
-                    <th>Typical Weight</th>
-                    <td>{organ.weight}</td>
-                    <td>{reference.weight}</td>
+                    <th>Typical Mass / Weight</th>
+                    <td className="val-text"><strong>{organ.weight}</strong></td>
+                    <td className="val-text"><strong>{reference.weight}</strong></td>
                   </tr>
                   <tr>
-                    <th>Daily Activity / Output</th>
-                    <td>{organ.dailyFact}</td>
-                    <td>{reference.dailyFact}</td>
+                    <th>Daily Activity / Workload</th>
+                    <td className="desc-text">{organ.dailyFact}</td>
+                    <td className="desc-text">{reference.dailyFact}</td>
                   </tr>
                   <tr>
-                    <th>Blood Supply</th>
-                    <td>{organ.bloodSupply}</td>
-                    <td>{reference.bloodSupply}</td>
+                    <th>Vascular Supply</th>
+                    <td className="desc-text">{organ.bloodSupply}</td>
+                    <td className="desc-text">{reference.bloodSupply}</td>
                   </tr>
                   <tr>
-                    <th>Tissue Structure</th>
-                    <td>{organ.tissue}</td>
-                    <td>{reference.tissue}</td>
+                    <th>Tissue Architecture</th>
+                    <td className="desc-text">{organ.tissue}</td>
+                    <td className="desc-text">{reference.tissue}</td>
                   </tr>
                   <tr>
-                    <th>Medical Relevance</th>
-                    <td>{organ.medical}</td>
-                    <td>{reference.medical}</td>
+                    <th>Clinical Relevance</th>
+                    <td className="desc-text">{organ.medical}</td>
+                    <td className="desc-text">{reference.medical}</td>
                   </tr>
                   <tr>
                     <th>Common Conditions</th>
-                    <td>{organ.conditions?.slice(0, 5).join(", ") || "—"}</td>
-                    <td>{reference.conditions?.slice(0, 5).join(", ") || "—"}</td>
+                    <td>
+                      <div className="condition-chips">
+                        {organ.conditions && organ.conditions.length > 0 ? (
+                          organ.conditions.slice(0, 5).map((cond) => (
+                            <span key={cond} className="cond-chip">{cond}</span>
+                          ))
+                        ) : (
+                          <span className="empty-val">—</span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="condition-chips">
+                        {reference.conditions && reference.conditions.length > 0 ? (
+                          reference.conditions.slice(0, 5).map((cond) => (
+                            <span key={cond} className="cond-chip ref-cond-chip">{cond}</span>
+                          ))
+                        ) : (
+                          <span className="empty-val">—</span>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <div style={{ display: "flex", gap: "10px", marginTop: "1.2rem", justifyContent: "flex-end" }}>
-              <button
-                type="button"
-                className="lesson-button"
-                style={{ width: "auto", padding: "0 18px", background: "var(--lavender)", color: "#fff" }}
-                onClick={() => {
-                  onSelectOrgan?.(reference.id);
-                  onClose();
-                }}
-              >
-                Inspect {reference.name} in 3D <ArrowRight size={15} />
-              </button>
+            {/* 3. Action Footer */}
+            <div className="compare-modal-footer">
+              <div className="compare-footer-note">
+                <Sparkles size={14} />
+                <span>Select any organ in the dropdown to cross-examine anatomical traits.</span>
+              </div>
+              <div className="compare-footer-actions">
+                <button
+                  type="button"
+                  className="compare-btn-dismiss"
+                  onClick={onClose}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="compare-btn-inspect"
+                  onClick={() => {
+                    onSelectOrgan?.(reference.id);
+                    onClose();
+                  }}
+                >
+                  <Eye size={15} />
+                  <span>Inspect {reference.name} in 3D</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
             </div>
           </div>
         ) : type === "profile" ? (
