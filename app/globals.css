@@ -837,6 +837,10 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   --font-serif: "AppleMyungjo", "Nanum Myeongjo", "Batang", "Noto Serif CJK KR", serif;
   --font-sans: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", sans-serif;
 }
+.font-stack-devanagari {
+  --font-serif: "Kohinoor Devanagari", "Noto Serif Devanagari", "Mangal", "Kokila", serif;
+  --font-sans: "Kohinoor Devanagari", "Noto Sans Devanagari", "Aparajita", "Utsaah", sans-serif;
+}
 
 /* ------------------------------------------------------- labelling quiz --- */
 

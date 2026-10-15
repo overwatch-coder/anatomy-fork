@@ -7,7 +7,10 @@ const nextConfig: NextConfig = {
   // language. (Accept-Language negotiation would need middleware, which the
   // Cloudflare/vinext target does not run — the in-app switcher covers it.)
   async redirects() {
-    return [{ source: "/", destination: `/${defaultLocale}`, permanent: false }];
+    return [
+      { source: "/", destination: `/${defaultLocale}`, permanent: false },
+      { source: "/systems", destination: `/${defaultLocale}/systems`, permanent: false },
+    ];
   },
 };
 
