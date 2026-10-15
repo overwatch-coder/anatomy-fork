@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { organById } from "../lib/anatomy-data";
 import { localizeOrgan } from "../lib/anatomy-ru";
 import { systemForOrgan } from "../lib/content/systems";
+import type { OrganContentDictionary } from "../i18n/types";
 
 /** One colour per system, used both in the figure and the legend. */
 export const SYSTEM_COLORS: Record<string, string> = {
@@ -31,12 +32,15 @@ export function BodyFigure({
   selectedSystem,
   onSelectOrgan,
   locale = "en",
+  organDict,
 }: {
   selectedSystem: string | null;
   onSelectOrgan: (id: string) => void;
   locale?: string;
+  organDict?: OrganContentDictionary;
 }) {
   const label = (id: string) => {
+    if (organDict?.[id]?.name) return organDict[id].name;
     const organ = organById[id as keyof typeof organById];
     if (!organ) return id;
     if (locale === "ru") return localizeOrgan(organ, "ru").name;

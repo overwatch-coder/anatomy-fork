@@ -12,27 +12,38 @@ import { localizeOrgan } from "../lib/anatomy-ru";
 import { bodySystems, systemById } from "../lib/content/systems";
 import { BodyFigure, SYSTEM_COLORS } from "./BodyFigure";
 import { AppHeader } from "./AppHeader";
-import type { UiDictionary } from "../i18n/types";
+import type { OrganContentDictionary, UiDictionary } from "../i18n/types";
+import { getModalDictionary } from "../i18n/modals";
 
 /** Full-page overview of the twelve body systems with an interactive figure. */
 export function SystemsPage({
   locale = "en",
   t,
+  organDict,
 }: {
   locale?: string;
   t?: UiDictionary;
+  organDict?: OrganContentDictionary;
 }) {
   const router = useRouter();
+  const m = getModalDictionary(locale);
   const [selectedId, setSelectedId] = useState<string>("cardiovascular");
-  const selected = systemById[selectedId];
+  const selected = systemById[selectedId] ?? bodySystems[0];
   const langKey = locale === "ru" ? "ru" : "en";
-  const localized = (selected as any)[langKey] ?? selected.en;
+  const localized = (selected as any)[locale] ?? (selected as any)[langKey] ?? selected.en;
 
   const openOrgan = (id: string) => {
     router.push(`/${locale}?organ=${id}`);
   };
 
   const getOrganItem = (id: string) => {
+    if (organDict?.[id]) {
+      const base = organById[id as keyof typeof organById];
+      return {
+        name: organDict[id].name,
+        icon: base?.icon ?? "✦",
+      };
+    }
     const organ = organById[id as keyof typeof organById];
     if (!organ) return { name: id, icon: "✦" };
     if (locale === "ru") return localizeOrgan(organ, "ru");
@@ -44,16 +55,16 @@ export function SystemsPage({
       <AppHeader locale={locale} t={t} activePage="systems" />
 
       <div className="systems-hero">
-        <h1>{t?.nav?.systems ?? "Body Systems"}</h1>
-        <p>Twelve organ systems working as one coordinated living whole. Select a system to highlight its path through the body.</p>
+        <h1>{t?.nav?.systems ?? m.systemsHeroTitle}</h1>
+        <p>{m.systemsHeroSubtitle}</p>
       </div>
 
       <div className="systems-layout">
         <aside className="systems-panel" aria-label="Organ systems">
-          <h2>Select system</h2>
+          <h2>{m.selectSystem}</h2>
           <div className="systems-list" role="tablist" aria-label="Organ systems">
             {bodySystems.map((system) => {
-              const item = (system as any)[langKey] ?? system.en;
+              const item = (system as any)[locale] ?? (system as any)[langKey] ?? system.en;
               return (
                 <button
                   key={system.id}
@@ -73,11 +84,16 @@ export function SystemsPage({
         </aside>
 
         <section className="figure-panel" aria-label="Human body figure">
-          <BodyFigure selectedSystem={selectedId} onSelectOrgan={openOrgan} locale={locale} />
-          <p className="figure-hint"><Sparkles size={14} /> Click any organ or system to focus</p>
+          <BodyFigure
+            selectedSystem={selectedId}
+            onSelectOrgan={openOrgan}
+            locale={locale}
+            organDict={organDict}
+          />
+          <p className="figure-hint"><Sparkles size={14} /> {m.figureHint}</p>
           <div className="legend" aria-label="Systems legend">
             {bodySystems.map((system) => {
-              const sysItem = (system as any)[langKey] ?? system.en;
+              const sysItem = (system as any)[locale] ?? (system as any)[langKey] ?? system.en;
               return (
                 <button
                   key={system.id}
@@ -95,11 +111,11 @@ export function SystemsPage({
         </section>
 
         <aside className="system-detail-panel">
-          <h2>System details</h2>
+          <h2>{m.systemDetails}</h2>
           <div className="detail-card" key={selectedId}>
             <h3>{localized.name}</h3>
             <p>{localized.description}</p>
-            <h4>Interactive 3D models</h4>
+            <h4>{m.interactiveModels}</h4>
             <div className="organ-chips">
               {selected.organIds.map((id) => {
                 const item = getOrganItem(id);
@@ -116,12 +132,12 @@ export function SystemsPage({
             </div>
           </div>
           <Link className="lesson-button" href={`/${locale}`}>
-            Back to 3D explore <ArrowRight size={16} />
+            {m.backTo3D} <ArrowRight size={16} />
           </Link>
         </aside>
       </div>
 
-      <p className="systems-note"><Sparkles size={15} /> All organ systems are functionally interdependent — no organ functions in isolation.</p>
+      <p className="systems-note"><Sparkles size={15} /> {m.systemsInterdependentNote}</p>
     </main>
   );
 }

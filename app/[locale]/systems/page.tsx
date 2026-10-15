@@ -14,6 +14,6 @@ export default async function Page({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const { ui } = await getDictionary(locale);
-  return <SystemsPage locale={locale} t={ui} />;
+  const { ui, organs } = await getDictionary(locale);
+  return <SystemsPage locale={locale} t={ui} organDict={organs} />;
 }

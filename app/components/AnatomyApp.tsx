@@ -48,6 +48,7 @@ import { lessons } from "../lib/content/lessons";
 import { histology } from "../lib/content/histology";
 import { functionAnimations } from "../lib/content/animations";
 import { progressStore, useProgress } from "../lib/progress";
+import { getModalDictionary } from "../i18n/modals";
 
 type Modal = "lesson" | "quiz" | "animation" | "system" | "inside" | "profile" | "compare" | "notes" | null;
 
@@ -447,6 +448,7 @@ function LearningModal({
   onClose: () => void;
 }) {
   const vars = { organ: organ.name, location: organ.location };
+  const m = getModalDictionary(locale);
   const langKey = locale === "ru" ? "ru" : "en";
   const progress = useProgress();
 
@@ -473,9 +475,9 @@ function LearningModal({
 
   // Content data
   const organQuestions = quizBank[organ.id] ?? [];
-  const curLesson = (lessons[lessonOrganId] as any)?.[langKey] ?? lessons[lessonOrganId]?.en;
-  const organHisto = (histology[organ.id] as any)?.[langKey] ?? histology[organ.id]?.en;
-  const organAnim = (functionAnimations[organ.id] as any)?.[langKey] ?? functionAnimations[organ.id]?.en;
+  const curLesson = (lessons[lessonOrganId] as any)?.[locale] ?? (lessons[lessonOrganId] as any)?.[langKey] ?? lessons[lessonOrganId]?.en;
+  const organHisto = (histology[organ.id] as any)?.[locale] ?? (histology[organ.id] as any)?.[langKey] ?? histology[organ.id]?.en;
+  const organAnim = (functionAnimations[organ.id] as any)?.[locale] ?? (functionAnimations[organ.id] as any)?.[langKey] ?? functionAnimations[organ.id]?.en;
 
   // Lesson organ nav handlers
   const organIndex = allOrgans ? allOrgans.findIndex((o) => o.id === lessonOrganId) : -1;
@@ -523,7 +525,7 @@ function LearningModal({
   };
 
   const handleClearNote = () => {
-    if (confirm(`Clear study notes for ${activeNotesOrgan.name}?`)) {
+    if (confirm(format(m.confirmClear, { organ: activeNotesOrgan.name }))) {
       setLocalNoteText("");
       setIsDirty(false);
       progressStore.setNote(notesOrganId, "");
@@ -587,13 +589,13 @@ function LearningModal({
   };
 
   const title =
-    type === "quiz" ? `${organ.name} Theory Quiz`
-    : type === "lesson" ? `Anatomical Lesson: ${activeLessonOrgan.name}`
+    type === "quiz" ? format(m.theoryQuizTitle, { organ: organ.name })
+    : type === "lesson" ? `${activeLessonOrgan.name} — ${m.coreObjectives}`
     : type === "animation" ? format(t.modal.motionTitle, vars)
     : type === "system" ? format(t.modal.bodyTitle, vars)
-    : type === "notes" ? "Clinical Study Notes"
-    : type === "profile" ? "Learner Profile & Progress"
-    : type === "compare" ? `Anatomical Comparison: ${organ.name} vs. ${reference?.name ?? "Reference"}`
+    : type === "notes" ? m.notesTitle
+    : type === "profile" ? m.tabProfile
+    : type === "compare" ? `${organ.name} vs. ${reference?.name ?? ""}`
     : format(t.modal.insideTitle, vars);
 
   return (
@@ -610,34 +612,34 @@ function LearningModal({
         {type === "compare" && reference ? (
           <header className="compare-modal-header">
             <span className="modal-icon compare-icon">⚖</span>
-            <em className="compare-eyebrow">Comparative Anatomy & Physiology</em>
+            <em className="compare-eyebrow">{m.compareEyebrow}</em>
             <h2 id="modal-title" className="compare-title">
               {organ.name} <span className="compare-vs-pill">vs</span> {reference.name}
             </h2>
             <p className="compare-lead">
-              Cross-examination of functional, morphological, and clinical traits
+              {m.compareLead}
             </p>
           </header>
         ) : type === "lesson" ? (
           <header className="compare-modal-header">
             <span className="modal-icon lesson-icon">✦</span>
-            <em className="compare-eyebrow">Masterclass & Clinical Curriculum</em>
+            <em className="compare-eyebrow">{m.lessonEyebrow}</em>
             <h2 id="modal-title" className="compare-title">
               {activeLessonOrgan.name} <span className="hero-system-pill" style={{ verticalAlign: "middle", fontSize: "12px", marginLeft: "6px" }}>{activeLessonOrgan.system}</span>
             </h2>
             <p className="compare-lead">
-              Systematic study of anatomical structure, physiological function, and clinical pathology
+              {m.lessonLead}
             </p>
           </header>
         ) : type === "notes" || type === "profile" ? (
           <header className="compare-modal-header">
             <span className="modal-icon notes-icon">📝</span>
-            <em className="compare-eyebrow">Interactive Notebook & Study Metrics</em>
+            <em className="compare-eyebrow">{m.notesEyebrow}</em>
             <h2 id="modal-title" className="compare-title">
-              Clinical Study Journal
+              {m.notesTitle}
             </h2>
             <p className="compare-lead">
-              Document observations, high-yield clinical pearls, and monitor curriculum progress
+              {m.notesLead}
             </p>
           </header>
         ) : (
@@ -652,21 +654,21 @@ function LearningModal({
           <div className="quiz-container" style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
             {organQuestions.length === 0 ? (
               <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
-                <p style={{ fontSize: "1.1rem" }}>Theory questions for this organ will be available soon.</p>
+                <p style={{ fontSize: "1.1rem" }}>{m.noQuestionsYet}</p>
                 <button
                   type="button"
                   className="lesson-button"
                   onClick={onStartLabelQuiz}
                   style={{ background: "var(--coral)", color: "#fff", marginTop: "1rem" }}
                 >
-                  Take 3D Labelling Quiz
+                  {m.take3DQuiz}
                 </button>
               </div>
             ) : !quizFinished && currentQ ? (
               <>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem", color: "var(--muted)" }}>
-                  <span>Question {qIndex + 1} of {organQuestions.length}</span>
-                  <span>Score: {score}</span>
+                  <span>{format(m.questionOf, { current: String(qIndex + 1), total: String(organQuestions.length) })}</span>
+                  <span>{format(m.scoreLabel, { score: String(score) })}</span>
                 </div>
                 <p style={{ fontWeight: 600, fontSize: "1.1rem", marginBottom: "1rem" }}>{currentQ.prompt}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -705,29 +707,29 @@ function LearningModal({
                 </div>
                 {selectedOption !== null && (
                   <div style={{ marginTop: "1rem", padding: "12px", background: "rgba(0,0,0,0.02)", borderRadius: "8px", borderLeft: "3px solid var(--coral)" }}>
-                    <p style={{ margin: 0, fontSize: "0.95rem" }}><b>Explanation:</b> {currentQ.explanation}</p>
+                    <p style={{ margin: 0, fontSize: "0.95rem" }}><b>{m.explanation}</b> {currentQ.explanation}</p>
                     <button
                       type="button"
                       className="lesson-button"
                       onClick={handleNextQ}
                       style={{ marginTop: "10px" }}
                     >
-                      {qIndex + 1 < organQuestions.length ? "Next Question" : "Finish Quiz"} <ArrowRight size={15} />
+                      {qIndex + 1 < organQuestions.length ? m.nextQuestion : m.finishQuiz} <ArrowRight size={15} />
                     </button>
                   </div>
                 )}
               </>
             ) : (
               <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
-                <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>Quiz Complete!</p>
-                <p style={{ fontSize: "1.1rem", margin: "10px 0" }}>You scored {score} out of {organQuestions.length}</p>
+                <p style={{ fontSize: "1.3rem", fontWeight: 600 }}>{m.quizComplete}</p>
+                <p style={{ fontSize: "1.1rem", margin: "10px 0" }}>{format(m.youScored, { score: String(score), total: String(organQuestions.length) })}</p>
                 <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "1rem" }}>
                   <button
                     type="button"
                     className="lesson-button"
                     onClick={() => { setQIndex(0); setSelectedOption(null); setScore(0); setQuizFinished(false); }}
                   >
-                    Retry Theory Quiz
+                    {m.retryQuiz}
                   </button>
                   <button
                     type="button"
@@ -735,7 +737,7 @@ function LearningModal({
                     onClick={onStartLabelQuiz}
                     style={{ background: "var(--coral)", color: "#fff" }}
                   >
-                    Take 3D Labelling Quiz
+                    {m.take3DQuiz}
                   </button>
                 </div>
               </div>
@@ -750,8 +752,8 @@ function LearningModal({
                   type="button"
                   className="lesson-nav-arrow"
                   onClick={handlePrevLessonOrgan}
-                  title="Previous specimen"
-                  aria-label="Previous specimen"
+                  title={m.prevSpecimen}
+                  aria-label={m.prevSpecimen}
                 >
                   <ChevronLeft size={16} />
                 </button>
@@ -764,7 +766,7 @@ function LearningModal({
                     value={lessonOrganId}
                     onChange={(e) => setLessonOrganId(e.target.value as OrganId)}
                     className="lesson-organ-dropdown"
-                    aria-label="Select specimen lesson"
+                    aria-label={m.selectLessonAria}
                   >
                     {allOrgans?.map((o) => (
                       <option key={o.id} value={o.id}>
@@ -779,8 +781,8 @@ function LearningModal({
                   type="button"
                   className="lesson-nav-arrow"
                   onClick={handleNextLessonOrgan}
-                  title="Next specimen"
-                  aria-label="Next specimen"
+                  title={m.nextSpecimen}
+                  aria-label={m.nextSpecimen}
                 >
                   <ChevronRight size={16} />
                 </button>
@@ -789,16 +791,16 @@ function LearningModal({
               <div className="lesson-meta-badges">
                 <span className="lesson-pill-tag">{activeLessonOrgan.system}</span>
                 <span className="lesson-pill-time">
-                  <Clock size={12} /> ~4 min read
+                  <Clock size={12} /> {m.readTime}
                 </span>
                 <button
                   type="button"
                   className={`lesson-status-pill ${isLessonComplete ? "completed" : ""}`}
                   onClick={() => progressStore.markLesson(lessonOrganId)}
-                  title="Toggle completion status"
+                  title={isLessonComplete ? m.lessonCompleted : m.markComplete}
                 >
                   <Check size={13} />
-                  <span>{isLessonComplete ? "Lesson Complete" : "Mark as Complete"}</span>
+                  <span>{isLessonComplete ? m.lessonCompleted : m.markComplete}</span>
                 </button>
               </div>
             </div>
@@ -809,7 +811,7 @@ function LearningModal({
               <section className="lesson-card objectives-card">
                 <header className="lesson-card-header">
                   <span className="lesson-step-badge">1</span>
-                  <h4>Core Learning Objectives</h4>
+                  <h4>{m.coreObjectives}</h4>
                 </header>
                 <ul className="lesson-objectives-list">
                   {curLesson.objectives?.map((obj: string, i: number) => (
@@ -825,21 +827,21 @@ function LearningModal({
               <section className="lesson-card structure-card">
                 <header className="lesson-card-header">
                   <span className="lesson-step-badge">2</span>
-                  <h4>Anatomical Architecture & Morphology</h4>
+                  <h4>{m.anatomicalArchitecture}</h4>
                 </header>
                 <p className="lesson-body-prose">{curLesson.structure}</p>
                 <div className="lesson-metric-strip">
                   <dl style={{ display: "contents" }}>
                     <div>
-                      <dt>Tissue Type</dt>
+                      <dt>{m.tissueType}</dt>
                       <dd>{activeLessonOrgan.tissue}</dd>
                     </div>
                     <div>
-                      <dt>Physical Dimensions</dt>
+                      <dt>{m.physicalDimensions}</dt>
                       <dd>{activeLessonOrgan.size}</dd>
                     </div>
                     <div>
-                      <dt>Specimen Mass</dt>
+                      <dt>{m.specimenMass}</dt>
                       <dd>{activeLessonOrgan.weight}</dd>
                     </div>
                   </dl>
@@ -850,11 +852,11 @@ function LearningModal({
               <section className="lesson-card function-card">
                 <header className="lesson-card-header">
                   <span className="lesson-step-badge">3</span>
-                  <h4>Physiological Mechanisms & Workload</h4>
+                  <h4>{m.physiologicalMechanisms}</h4>
                 </header>
                 <p className="lesson-body-prose">{curLesson.function}</p>
                 <div className="lesson-highlight-box">
-                  <strong>Vascular & Hemodynamic Supply:</strong> {activeLessonOrgan.bloodSupply}
+                  <strong>{m.vascularSupply}</strong> {activeLessonOrgan.bloodSupply}
                 </div>
               </section>
 
@@ -862,13 +864,13 @@ function LearningModal({
               <section className="lesson-card clinical-card">
                 <header className="lesson-card-header">
                   <span className="lesson-step-badge">4</span>
-                  <h4>Clinical Correlates & Pathology</h4>
+                  <h4>{m.clinicalCorrelates}</h4>
                 </header>
                 <div className="clinical-cases-grid">
                   {curLesson.clinical?.map((clin: string, i: number) => {
                     const parts = clin.split(": ");
                     const hasTitle = parts.length > 1;
-                    const heading = hasTitle ? parts[0] : `Clinical Scenario #${i + 1}`;
+                    const heading = hasTitle ? parts[0] : `${m.clinicalCorrelates} #${i + 1}`;
                     const detail = hasTitle ? parts.slice(1).join(": ") : clin;
                     return (
                       <div key={i} className="clinical-case-item">
@@ -888,7 +890,7 @@ function LearningModal({
                 <section className="lesson-card sources-card">
                   <header className="lesson-card-header">
                     <span className="lesson-step-badge">5</span>
-                    <h4>Literature & Canonical References</h4>
+                    <h4>{m.canonicalLiterature}</h4>
                   </header>
                   <ul className="lesson-sources-list">
                     {curLesson.sources.map((src: string, i: number) => (
@@ -911,7 +913,7 @@ function LearningModal({
                   }}
                 >
                   <CircleHelp size={14} />
-                  <span>Practice Quiz</span>
+                  <span>{m.practiceQuiz}</span>
                 </button>
                 <button
                   type="button"
@@ -922,7 +924,7 @@ function LearningModal({
                   }}
                 >
                   <NotebookPen size={14} />
-                  <span>Take Study Notes</span>
+                  <span>{m.takeNotes}</span>
                 </button>
               </div>
 
@@ -932,10 +934,10 @@ function LearningModal({
                   className={`lesson-secondary-btn ${isLessonComplete ? "completed" : ""}`}
                   style={isLessonComplete ? { background: "rgba(92, 158, 107, 0.15)", color: "#2e693b", borderColor: "#5c9e6b" } : undefined}
                   onClick={() => progressStore.markLesson(lessonOrganId)}
-                  title="Save lesson completion status"
+                  title={isLessonComplete ? m.lessonCompleted : m.saveProgress}
                 >
                   <Check size={14} />
-                  <span>{isLessonComplete ? "Lesson Completed" : "Save Lesson Progress"}</span>
+                  <span>{isLessonComplete ? m.lessonCompleted : m.saveProgress}</span>
                 </button>
 
                 <button
@@ -947,7 +949,7 @@ function LearningModal({
                   }}
                 >
                   <Eye size={15} />
-                  <span>Inspect {activeLessonOrgan.name} in 3D</span>
+                  <span>{format(m.inspectIn3D, { organ: activeLessonOrgan.name })}</span>
                   <ArrowRight size={14} />
                 </button>
               </div>
@@ -966,7 +968,7 @@ function LearningModal({
             </dl>
             {Array.isArray(organHisto) && organHisto.length > 0 && (
               <div style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
-                <h3 style={{ marginTop: "0.5rem", fontSize: "1.05rem" }}>Histological Layers</h3>
+                <h3 style={{ marginTop: "0.5rem", fontSize: "1.05rem" }}>{m.histologicalLayers}</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "0.5rem" }}>
                   {organHisto.map((l: { name: string; detail: string }, i: number) => (
                     <div key={i} style={{ padding: "8px 12px", background: "rgba(0,0,0,0.03)", borderRadius: "8px", fontSize: "0.9rem" }}>
@@ -1002,7 +1004,7 @@ function LearningModal({
               {/* Primary Active Organ */}
               <div className="compare-hero-card primary">
                 <div className="hero-card-meta">
-                  <span className="hero-badge primary-badge">Active Model</span>
+                  <span className="hero-badge primary-badge">{m.activeModel}</span>
                   <span className="hero-system-pill">{organ.system}</span>
                 </div>
                 <div className="hero-card-main">
@@ -1027,11 +1029,11 @@ function LearningModal({
                       onSelectOrgan(reference.id);
                       onSelectReference?.(organ.id);
                     }}
-                    title="Swap active and reference organs"
-                    aria-label="Swap active and reference organs"
+                    title={m.swap}
+                    aria-label={m.swap}
                   >
                     <ArrowLeftRight size={13} />
-                    <span>Swap</span>
+                    <span>{m.swap}</span>
                   </button>
                 )}
               </div>
@@ -1039,7 +1041,7 @@ function LearningModal({
               {/* Target Reference Organ */}
               <div className="compare-hero-card reference">
                 <div className="hero-card-meta">
-                  <span className="hero-badge ref-badge">Target Reference</span>
+                  <span className="hero-badge ref-badge">{m.targetReference}</span>
                   <span className="hero-system-pill ref-pill">{reference.system}</span>
                 </div>
                 <div className="hero-card-main">
@@ -1052,7 +1054,7 @@ function LearningModal({
                         value={reference.id}
                         onChange={(e) => onSelectReference?.(e.target.value as OrganId)}
                         className="hero-select"
-                        aria-label="Choose reference organ to compare"
+                        aria-label={m.chooseReferenceAria}
                       >
                         {allOrgans?.filter((o) => o.id !== organ.id).map((o) => (
                           <option key={o.id} value={o.id}>
@@ -1073,7 +1075,7 @@ function LearningModal({
               <table className="compare-matrix-table">
                 <thead>
                   <tr>
-                    <th className="col-metric">Anatomical Metric</th>
+                    <th className="col-metric">{m.anatomicalMetric}</th>
                     <th className="col-organ primary-col">
                       <span className="col-dot primary-dot" />
                       <span>{organ.name}</span>
@@ -1086,52 +1088,52 @@ function LearningModal({
                 </thead>
                 <tbody>
                   <tr>
-                    <th>Organ System</th>
+                    <th>{m.organSystem}</th>
                     <td><span className="metric-tag primary-tag">{organ.system}</span></td>
                     <td><span className="metric-tag ref-tag">{reference.system}</span></td>
                   </tr>
                   <tr>
-                    <th>Scientific Term (TA2)</th>
+                    <th>{m.scientificTerm}</th>
                     <td><em className="latin-name">{organ.scientificName}</em></td>
                     <td><em className="latin-name">{reference.scientificName}</em></td>
                   </tr>
                   <tr>
-                    <th>Primary Function</th>
+                    <th>{m.primaryFunction}</th>
                     <td className="desc-text">{organ.function}</td>
                     <td className="desc-text">{reference.function}</td>
                   </tr>
                   <tr>
-                    <th>Physical Scale</th>
+                    <th>{m.physicalScale}</th>
                     <td className="val-text"><strong>{organ.size}</strong></td>
                     <td className="val-text"><strong>{reference.size}</strong></td>
                   </tr>
                   <tr>
-                    <th>Typical Mass / Weight</th>
+                    <th>{m.typicalMass}</th>
                     <td className="val-text"><strong>{organ.weight}</strong></td>
                     <td className="val-text"><strong>{reference.weight}</strong></td>
                   </tr>
                   <tr>
-                    <th>Daily Activity / Workload</th>
+                    <th>{m.dailyActivity}</th>
                     <td className="desc-text">{organ.dailyFact}</td>
                     <td className="desc-text">{reference.dailyFact}</td>
                   </tr>
                   <tr>
-                    <th>Vascular Supply</th>
+                    <th>{m.vascularSupply}</th>
                     <td className="desc-text">{organ.bloodSupply}</td>
                     <td className="desc-text">{reference.bloodSupply}</td>
                   </tr>
                   <tr>
-                    <th>Tissue Architecture</th>
+                    <th>{m.tissueArchitecture}</th>
                     <td className="desc-text">{organ.tissue}</td>
                     <td className="desc-text">{reference.tissue}</td>
                   </tr>
                   <tr>
-                    <th>Clinical Relevance</th>
+                    <th>{m.clinicalRelevance}</th>
                     <td className="desc-text">{organ.medical}</td>
                     <td className="desc-text">{reference.medical}</td>
                   </tr>
                   <tr>
-                    <th>Common Conditions</th>
+                    <th>{m.commonConditions}</th>
                     <td>
                       <div className="condition-chips">
                         {organ.conditions && organ.conditions.length > 0 ? (
@@ -1163,7 +1165,7 @@ function LearningModal({
             <div className="compare-modal-footer">
               <div className="compare-footer-note">
                 <Sparkles size={14} />
-                <span>Select any organ in the dropdown to cross-examine anatomical traits.</span>
+                <span>{m.compareFooterNote}</span>
               </div>
               <div className="compare-footer-actions">
                 <button
@@ -1171,7 +1173,7 @@ function LearningModal({
                   className="compare-btn-dismiss"
                   onClick={onClose}
                 >
-                  Close
+                  {m.close}
                 </button>
                 <button
                   type="button"
@@ -1182,7 +1184,7 @@ function LearningModal({
                   }}
                 >
                   <Eye size={15} />
-                  <span>Inspect {reference.name} in 3D</span>
+                  <span>{format(m.inspectIn3D, { organ: reference.name })}</span>
                   <ArrowRight size={14} />
                 </button>
               </div>
@@ -1198,7 +1200,7 @@ function LearningModal({
                 onClick={() => setNotesTab("organ-note")}
               >
                 <NotebookPen size={14} />
-                <span>Active Specimen Note</span>
+                <span>{m.tabActiveNote}</span>
               </button>
 
               <button
@@ -1207,7 +1209,7 @@ function LearningModal({
                 onClick={() => setNotesTab("all-notes")}
               >
                 <BookOpen size={14} />
-                <span>All Study Notes ({Object.keys(progress.notes).length})</span>
+                <span>{format(m.tabAllNotes, { count: String(Object.keys(progress.notes).length) })}</span>
               </button>
 
               <button
@@ -1216,7 +1218,7 @@ function LearningModal({
                 onClick={() => setNotesTab("profile")}
               >
                 <Sparkles size={14} />
-                <span>Learner Profile & Stats</span>
+                <span>{m.tabProfile}</span>
               </button>
             </div>
 
@@ -1240,7 +1242,7 @@ function LearningModal({
                       onChange={(e) => setNotesOrganId(e.target.value as OrganId)}
                       className="hero-select"
                       style={{ minWidth: "170px" }}
-                      aria-label="Choose organ to take notes"
+                      aria-label={m.chooseReferenceAria}
                     >
                       {allOrgans?.map((o) => (
                         <option key={o.id} value={o.id}>
@@ -1254,35 +1256,35 @@ function LearningModal({
                 {/* High-Yield Prompts */}
                 <div className="notes-prompts-bar">
                   <span className="prompts-label">
-                    <Sparkles size={12} /> High-Yield Prompts:
+                    <Sparkles size={12} /> {m.highYieldPrompts}
                   </span>
                   <button
                     type="button"
                     className="prompt-chip"
-                    onClick={() => handleAppendPrompt("Morphology & Landmarks: ")}
+                    onClick={() => handleAppendPrompt(m.promptMorphologyPrefix)}
                   >
-                    + Morphology
+                    {m.promptMorphologyLabel}
                   </button>
                   <button
                     type="button"
                     className="prompt-chip"
-                    onClick={() => handleAppendPrompt("Physiological Role & Blood Supply: ")}
+                    onClick={() => handleAppendPrompt(m.promptPhysiologyPrefix)}
                   >
-                    + Physiology
+                    {m.promptPhysiologyLabel}
                   </button>
                   <button
                     type="button"
                     className="prompt-chip"
-                    onClick={() => handleAppendPrompt("Clinical High-Yield Pearl: ")}
+                    onClick={() => handleAppendPrompt(m.promptClinicalPrefix)}
                   >
-                    + Clinical Pearl
+                    {m.promptClinicalLabel}
                   </button>
                   <button
                     type="button"
                     className="prompt-chip"
-                    onClick={() => handleAppendPrompt("Diagnostic Triad / Mnemonic: ")}
+                    onClick={() => handleAppendPrompt(m.promptMnemonicPrefix)}
                   >
-                    + Mnemonic
+                    {m.promptMnemonicLabel}
                   </button>
                 </div>
 
@@ -1293,9 +1295,9 @@ function LearningModal({
                     value={localNoteText}
                     onChange={(e) => handleNoteChange(e.target.value)}
                     onKeyDown={(e) => e.stopPropagation()}
-                    placeholder={`Document your notes, diagnostic triads, or clinical observations for the ${activeNotesOrgan.name}...`}
+                    placeholder={format(m.placeholderNotes, { organ: activeNotesOrgan.name })}
                     rows={8}
-                    aria-label={`Study notes for ${activeNotesOrgan.name}`}
+                    aria-label={`${m.tabActiveNote} - ${activeNotesOrgan.name}`}
                   />
                 </div>
 
@@ -1304,16 +1306,16 @@ function LearningModal({
                   <div className="notes-status-msg">
                     {saveIndicator ? (
                       <span className="saved-indicator">
-                        <Check size={13} /> Note saved to local journal
+                        <Check size={13} /> {m.noteSaved}
                       </span>
                     ) : isDirty ? (
                       <span className="dirty-indicator" style={{ color: "var(--coral)", display: "inline-flex", alignItems: "center", gap: "6px", fontWeight: 600 }}>
                         <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "var(--coral)", display: "inline-block" }} />
-                        Unsaved changes (click Save Note below)
+                        {m.unsavedChanges}
                       </span>
                     ) : (
                       <span className="idle-indicator">
-                        {savedNoteText ? "Saved in local journal" : "Write your clinical notes above and click Save Note"}
+                        {savedNoteText ? m.savedInJournal : m.writeAndSave}
                       </span>
                     )}
                   </div>
@@ -1324,20 +1326,20 @@ function LearningModal({
                         type="button"
                         className="note-btn-clear"
                         onClick={handleClearNote}
-                        title="Clear current note"
+                        title={m.clear}
                       >
                         <Trash2 size={13} />
-                        <span>Clear</span>
+                        <span>{m.clear}</span>
                       </button>
                     )}
                     <button
                       type="button"
                       className="note-btn-copy"
                       onClick={handleCopyNote}
-                      title="Copy note to clipboard"
+                      title={m.copy}
                     >
                       <Copy size={13} />
-                      <span>Copy</span>
+                      <span>{m.copy}</span>
                     </button>
                     <button
                       type="button"
@@ -1346,19 +1348,19 @@ function LearningModal({
                         setLessonOrganId(notesOrganId);
                         onChangeModal?.("lesson");
                       }}
-                      title="Read lesson for this specimen"
+                      title={m.readLesson}
                     >
                       <BookOpen size={13} />
-                      <span>Read Lesson</span>
+                      <span>{m.readLesson}</span>
                     </button>
                     <button
                       type="button"
                       className="note-btn-save"
                       onClick={handleSaveNote}
-                      title="Save note to journal"
+                      title={m.saveNote}
                     >
                       <Save size={13} />
-                      <span>Save Note</span>
+                      <span>{m.saveNote}</span>
                     </button>
                   </div>
                 </div>
@@ -1366,7 +1368,7 @@ function LearningModal({
             ) : notesTab === "all-notes" ? (
               <div className="notes-directory-deck">
                 <div className="notes-directory-header">
-                  <p>Saved anatomical & clinical notes across your study sessions.</p>
+                  <p>{m.allNotesHeader}</p>
                   {Object.keys(progress.notes).length > 0 && (
                     <button
                       type="button"
@@ -1374,7 +1376,7 @@ function LearningModal({
                       onClick={handleExportAllNotes}
                     >
                       <Download size={13} />
-                      <span>Export All (.md)</span>
+                      <span>{m.exportAll}</span>
                     </button>
                   )}
                 </div>
@@ -1382,10 +1384,8 @@ function LearningModal({
                 {Object.entries(progress.notes).filter(([_, txt]) => Boolean(txt?.trim())).length === 0 ? (
                   <div className="notes-empty-state">
                     <span className="notes-empty-icon">📝</span>
-                    <h4>No study notes yet</h4>
-                    <p>
-                      Select any organ in the dropdown above or switch to the Active Specimen Note tab to start jotting down clinical pearls.
-                    </p>
+                    <h4>{m.emptyNotesTitle}</h4>
+                    <p>{m.emptyNotesDesc}</p>
                   </div>
                 ) : (
                   <div className="all-notes-list">
@@ -1415,7 +1415,7 @@ function LearningModal({
                                     setNotesTab("organ-note");
                                   }}
                                 >
-                                  Edit Note
+                                  {m.editNote}
                                 </button>
                                 <button
                                   type="button"
@@ -1425,7 +1425,7 @@ function LearningModal({
                                     onClose();
                                   }}
                                 >
-                                  View in 3D
+                                  {m.viewIn3D}
                                 </button>
                               </div>
                             </div>
@@ -1441,27 +1441,27 @@ function LearningModal({
                 <div className="profile-metrics-grid">
                   <div className="profile-stat-box">
                     <span className="stat-number">{Object.keys(progress.visited).length} / 30</span>
-                    <span className="stat-label">Organs Explored</span>
+                    <span className="stat-label">{m.organsExplored}</span>
                   </div>
                   <div className="profile-stat-box">
                     <span className="stat-number">{Object.keys(progress.lessons).length} / 30</span>
-                    <span className="stat-label">Lessons Completed</span>
+                    <span className="stat-label">{m.lessonsCompleted}</span>
                   </div>
                   <div className="profile-stat-box">
                     <span className="stat-number">{Object.keys(progress.notes).length}</span>
-                    <span className="stat-label">Notes Authored</span>
+                    <span className="stat-label">{m.notesAuthored}</span>
                   </div>
                   <div className="profile-stat-box">
                     <span className="stat-number">{progress.saved.length}</span>
-                    <span className="stat-label">Bookmarked</span>
+                    <span className="stat-label">{m.bookmarked}</span>
                   </div>
                 </div>
 
                 <div className="profile-quiz-history">
-                  <h4>Quiz Performance History ({Object.keys(progress.quiz).length} records)</h4>
+                  <h4>{format(m.quizHistory, { count: String(Object.keys(progress.quiz).length) })}</h4>
                   {Object.keys(progress.quiz).length === 0 ? (
                     <p style={{ color: "var(--muted)", fontStyle: "italic", fontSize: "13px" }}>
-                      No theory quizzes taken yet. Test your knowledge on any organ from its lesson or quiz view.
+                      {m.noQuizYet}
                     </p>
                   ) : (
                     <div className="quiz-records-table">
@@ -1471,10 +1471,10 @@ function LearningModal({
                           <div key={id} className="quiz-record-row">
                             <span className="record-organ">{item?.name ?? id}</span>
                             <span className="record-score">
-                              Best: {qp.best} / {qp.total} ({Math.round((qp.best / qp.total) * 100)}%)
+                              {format(m.bestScore, { best: String(qp.best), total: String(qp.total), pct: String(Math.round((qp.best / qp.total) * 100)) })}
                             </span>
                             <span className="record-attempts">
-                              {qp.attempts} attempt{qp.attempts > 1 ? "s" : ""}
+                              {format(m.attempts, { count: String(qp.attempts), s: qp.attempts > 1 ? (locale === "ru" ? "и" : "s") : "" })}
                             </span>
                           </div>
                         );
@@ -1488,13 +1488,13 @@ function LearningModal({
                     type="button"
                     className="note-btn-clear"
                     onClick={() => {
-                      if (confirm("Reset all learning progress, quiz scores, and study notes?")) {
+                      if (confirm(m.confirmReset)) {
                         progressStore.reset();
                       }
                     }}
                   >
                     <RotateCcw size={13} />
-                    <span>Reset All Progress</span>
+                    <span>{m.resetProgress}</span>
                   </button>
                 </div>
               </div>
@@ -1512,7 +1512,7 @@ function LearningModal({
               <div><dt>{t.modal.bloodSupply}</dt><dd><Measure>{organ.bloodSupply}</Measure></dd></div>
             </dl>
             <Link className="lesson-button" href={`/${locale}/systems`} style={{ display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none", color: "inherit", marginTop: "10px" }}>
-              Open Interactive Systems Map <ArrowRight size={16} />
+              {m.openInteractiveSystemsMap} <ArrowRight size={16} />
             </Link>
           </>
         ) : (
