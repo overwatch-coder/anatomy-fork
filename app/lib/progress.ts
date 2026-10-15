@@ -119,9 +119,9 @@ export const progressStore = {
   },
   setNote(id: OrganId, text: string) {
     commit((draft) => {
-      const trimmed = text.trim();
-      if (trimmed) draft.notes = { ...draft.notes, [id]: trimmed };
-      else {
+      if (typeof text === "string" && text.trim().length > 0) {
+        draft.notes = { ...draft.notes, [id]: text };
+      } else {
         const next = { ...draft.notes };
         delete next[id];
         draft.notes = next;

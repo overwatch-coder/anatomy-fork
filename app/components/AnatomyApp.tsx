@@ -28,6 +28,7 @@ import {
   Play,
   Plus,
   RotateCcw,
+  Save,
   Search,
   Share2,
   Sparkles,
@@ -491,34 +492,47 @@ function LearningModal({
 
   const isLessonComplete = (progress.lessons[lessonOrganId] ?? 0) > 0;
 
-  // Notes handlers
-  const currentNoteText = progress.notes[notesOrganId] ?? "";
+  // Notes state & handlers
+  const savedNoteText = progress.notes[notesOrganId] ?? "";
+  const [localNoteText, setLocalNoteText] = useState<string>(savedNoteText);
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+
+  useEffect(() => {
+    setLocalNoteText(progress.notes[notesOrganId] ?? "");
+    setIsDirty(false);
+  }, [notesOrganId]);
 
   const handleNoteChange = (text: string) => {
-    progressStore.setNote(notesOrganId, text);
+    setLocalNoteText(text);
+    setIsDirty(true);
+  };
+
+  const handleSaveNote = () => {
+    progressStore.setNote(notesOrganId, localNoteText);
+    setIsDirty(false);
     setSaveIndicator(true);
-    setTimeout(() => setSaveIndicator(false), 1800);
+    setTimeout(() => setSaveIndicator(false), 2500);
   };
 
   const handleAppendPrompt = (prompt: string) => {
-    const existing = progress.notes[notesOrganId] ?? "";
+    const existing = localNoteText;
     const prefix = existing.trim() ? `${existing.trim()}\n\n` : "";
     const next = `${prefix}• ${prompt}`;
-    progressStore.setNote(notesOrganId, next);
-    setSaveIndicator(true);
-    setTimeout(() => setSaveIndicator(false), 1800);
+    setLocalNoteText(next);
+    setIsDirty(true);
   };
 
   const handleClearNote = () => {
     if (confirm(`Clear study notes for ${activeNotesOrgan.name}?`)) {
+      setLocalNoteText("");
+      setIsDirty(false);
       progressStore.setNote(notesOrganId, "");
     }
   };
 
   const handleCopyNote = () => {
-    const note = progress.notes[notesOrganId] || "";
-    if (!note) return;
-    void navigator.clipboard?.writeText(note);
+    if (!localNoteText) return;
+    void navigator.clipboard?.writeText(localNoteText);
     setSaveIndicator(true);
     setTimeout(() => setSaveIndicator(false), 1800);
   };
@@ -912,18 +926,31 @@ function LearningModal({
                 </button>
               </div>
 
-              <button
-                type="button"
-                className="lesson-inspect-btn"
-                onClick={() => {
-                  onSelectOrgan?.(lessonOrganId);
-                  onClose();
-                }}
-              >
-                <Eye size={15} />
-                <span>Inspect {activeLessonOrgan.name} in 3D</span>
-                <ArrowRight size={14} />
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <button
+                  type="button"
+                  className={`lesson-secondary-btn ${isLessonComplete ? "completed" : ""}`}
+                  style={isLessonComplete ? { background: "rgba(92, 158, 107, 0.15)", color: "#2e693b", borderColor: "#5c9e6b" } : undefined}
+                  onClick={() => progressStore.markLesson(lessonOrganId)}
+                  title="Save lesson completion status"
+                >
+                  <Check size={14} />
+                  <span>{isLessonComplete ? "Lesson Completed" : "Save Lesson Progress"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="lesson-inspect-btn"
+                  onClick={() => {
+                    onSelectOrgan?.(lessonOrganId);
+                    onClose();
+                  }}
+                >
+                  <Eye size={15} />
+                  <span>Inspect {activeLessonOrgan.name} in 3D</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
             </div>
           </div>
         ) : type === "inside" ? (
@@ -1263,8 +1290,9 @@ function LearningModal({
                 <div className="notes-textarea-wrap">
                   <textarea
                     className="notes-textarea"
-                    value={currentNoteText}
+                    value={localNoteText}
                     onChange={(e) => handleNoteChange(e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
                     placeholder={`Document your notes, diagnostic triads, or clinical observations for the ${activeNotesOrgan.name}...`}
                     rows={8}
                     aria-label={`Study notes for ${activeNotesOrgan.name}`}
@@ -1276,17 +1304,22 @@ function LearningModal({
                   <div className="notes-status-msg">
                     {saveIndicator ? (
                       <span className="saved-indicator">
-                        <Check size={13} /> Auto-saved to local notebook
+                        <Check size={13} /> Note saved to local journal
+                      </span>
+                    ) : isDirty ? (
+                      <span className="dirty-indicator" style={{ color: "var(--coral)", display: "inline-flex", alignItems: "center", gap: "6px", fontWeight: 600 }}>
+                        <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "var(--coral)", display: "inline-block" }} />
+                        Unsaved changes (click Save Note below)
                       </span>
                     ) : (
                       <span className="idle-indicator">
-                        Persisted in browser storage
+                        {savedNoteText ? "Saved in local journal" : "Write your clinical notes above and click Save Note"}
                       </span>
                     )}
                   </div>
 
                   <div className="notes-editor-actions">
-                    {currentNoteText && (
+                    {localNoteText && (
                       <button
                         type="button"
                         className="note-btn-clear"
@@ -1308,14 +1341,24 @@ function LearningModal({
                     </button>
                     <button
                       type="button"
-                      className="note-btn-save"
+                      className="note-btn-copy"
                       onClick={() => {
                         setLessonOrganId(notesOrganId);
                         onChangeModal?.("lesson");
                       }}
+                      title="Read lesson for this specimen"
                     >
                       <BookOpen size={13} />
                       <span>Read Lesson</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="note-btn-save"
+                      onClick={handleSaveNote}
+                      title="Save note to journal"
+                    >
+                      <Save size={13} />
+                      <span>Save Note</span>
                     </button>
                   </div>
                 </div>
