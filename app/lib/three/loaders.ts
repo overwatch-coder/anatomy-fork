@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { disposeObject } from "./dispose";
 
 /** Edge length of the cube every organ is normalised into, so hotspot
@@ -25,6 +26,7 @@ export type LoadedOrgan = {
 
 export class AnatomyAssetManager {
   private loader: GLTFLoader;
+  private dracoLoader: DRACOLoader;
   private cache = new Map<string, LoadedOrgan>();
   private inflight = new Map<string, Promise<LoadedOrgan>>();
   private current: LoadedOrgan | null = null;
@@ -34,7 +36,11 @@ export class AnatomyAssetManager {
     // Anisotropy is what stops the texture detail from crawling at grazing
     // angles, which is most of the shimmer on a rotating organ.
     this.maxAnisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    this.loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+    this.dracoLoader = new DRACOLoader();
+    this.dracoLoader.setDecoderPath("/draco/");
+    this.loader = new GLTFLoader()
+      .setMeshoptDecoder(MeshoptDecoder)
+      .setDRACOLoader(this.dracoLoader);
   }
 
   get hasAnimation() {
@@ -223,5 +229,6 @@ export class AnatomyAssetManager {
     this.release();
     this.cache.forEach((organ) => this.destroy(organ));
     this.cache.clear();
+    this.dracoLoader.dispose();
   }
 }

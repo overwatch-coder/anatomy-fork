@@ -50,11 +50,10 @@ import { functionAnimations } from "../lib/content/animations";
 import { progressStore, useProgress } from "../lib/progress";
 import { getModalDictionary } from "../i18n/modals";
 
-type Modal = "lesson" | "quiz" | "animation" | "system" | "inside" | "profile" | "compare" | "notes" | null;
+type Modal = "lesson" | "quiz" | "animation" | "system" | "inside" | "profile" | "compare" | "notes" | "library" | null;
 
 /**
- * Renders an organ illustration, or its accent glyph for organs that ship as a
- * 3D model without the painted asset set.
+ * Renders an organ illustration or specimen thumbnail for any modelled organ.
  */
 function OrganArt({
   organ,
@@ -151,7 +150,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
 
   const selectOrgan = (id: OrganId) => {
     if (organById[id]?.illustrated) {
-      ["organ", "microscopic", "compare", "location"].forEach((asset) => {
+      ["organ", "microscopic", "compare", "location", "thumb"].forEach((asset) => {
         const image = new Image();
         image.src = `/anatomy/${id}/${asset}.webp`;
       });
@@ -223,7 +222,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
               </button>
             ))}
           </div>
-          <button className="view-all" onClick={() => { setQuery(""); setShowSavedOnly(false); }}>
+          <button className="view-all" onClick={() => { setQuery(""); setShowSavedOnly(false); setModal("library"); }}>
             {t.library.viewAll} <ArrowRight size={14} />
           </button>
           <blockquote>
@@ -420,6 +419,7 @@ const MODAL_ICON: Record<Exclude<Modal, null>, string> = {
   profile: "MA",
   compare: "⚖",
   notes: "📝",
+  library: "📚",
 };
 
 function LearningModal({
@@ -588,6 +588,30 @@ function LearningModal({
     }
   };
 
+  // Library catalog state
+  const [catalogQuery, setCatalogQuery] = useState("");
+  const [selectedSystem, setSelectedSystem] = useState("all");
+
+  const uniqueSystems = useMemo(() => {
+    if (!allOrgans) return [];
+    const set = new Set<string>();
+    allOrgans.forEach((o) => {
+      if (o.system) set.add(o.system);
+    });
+    return Array.from(set).sort();
+  }, [allOrgans]);
+
+  const catalogOrgans = useMemo(() => {
+    if (!allOrgans) return [];
+    return allOrgans.filter((item) => {
+      if (selectedSystem !== "all" && item.system !== selectedSystem) return false;
+      if (!catalogQuery.trim()) return true;
+      const q = catalogQuery.toLocaleLowerCase(locale);
+      const haystack = `${item.name} ${item.scientificName} ${item.system} ${item.function}`.toLocaleLowerCase(locale);
+      return haystack.includes(q);
+    });
+  }, [allOrgans, selectedSystem, catalogQuery, locale]);
+
   const title =
     type === "quiz" ? format(m.theoryQuizTitle, { organ: organ.name })
     : type === "lesson" ? `${activeLessonOrgan.name} — ${m.coreObjectives}`
@@ -596,12 +620,13 @@ function LearningModal({
     : type === "notes" ? m.notesTitle
     : type === "profile" ? m.tabProfile
     : type === "compare" ? `${organ.name} vs. ${reference?.name ?? ""}`
+    : type === "library" ? t.library.title
     : format(t.modal.insideTitle, vars);
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <section
-        className={`learning-modal ${type === "compare" || type === "lesson" || type === "notes" || type === "profile" ? "modal-compare" : (type === "system" || type === "quiz" ? "wide" : "")}`}
+        className={`learning-modal ${type === "compare" || type === "lesson" || type === "notes" || type === "profile" || type === "library" ? "modal-compare" : (type === "system" || type === "quiz" ? "wide" : "")}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
@@ -609,7 +634,20 @@ function LearningModal({
       >
         <button className="modal-close" onClick={onClose} aria-label={t.modal.close}><X size={18} /></button>
 
-        {type === "compare" && reference ? (
+        {type === "library" ? (
+          <header className="compare-modal-header">
+            <span className="modal-icon library-icon">📚</span>
+            <em className="compare-eyebrow">{t.library.title}</em>
+            <h2 id="modal-title" className="compare-title">
+              {t.library.viewAll} <span className="hero-system-pill" style={{ verticalAlign: "middle", fontSize: "12px", marginLeft: "6px" }}>{allOrgans?.length ?? 42}</span>
+            </h2>
+            <p className="compare-lead">
+              {locale === "ru"
+                ? "Исследуйте все анатомические препараты человека. Выберите любой орган для подробного изучения в 3D."
+                : "Explore all catalogued human anatomical specimens across all bodily systems. Select any specimen to inspect in 3D."}
+            </p>
+          </header>
+        ) : type === "compare" && reference ? (
           <header className="compare-modal-header">
             <span className="modal-icon compare-icon">⚖</span>
             <em className="compare-eyebrow">{m.compareEyebrow}</em>
@@ -650,7 +688,110 @@ function LearningModal({
           </>
         )}
 
-        {type === "quiz" ? (
+        {type === "library" ? (
+          <div className="library-catalog-wrap">
+            <div className="library-catalog-toolbar">
+              <div className="library-search-box">
+                <Search size={15} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                <input
+                  type="search"
+                  placeholder={t.search.placeholder}
+                  value={catalogQuery}
+                  onChange={(e) => setCatalogQuery(e.target.value)}
+                  autoFocus
+                />
+                {catalogQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setCatalogQuery("")}
+                    style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--muted)" }}
+                    aria-label={t.modal.close}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div className="library-system-pills">
+                <button
+                  type="button"
+                  className={`sys-pill ${selectedSystem === "all" ? "active" : ""}`}
+                  onClick={() => setSelectedSystem("all")}
+                >
+                  {locale === "ru" ? "Все системы" : "All Systems"} ({allOrgans?.length ?? 42})
+                </button>
+                {uniqueSystems.map((sys) => {
+                  const count = allOrgans?.filter((o) => o.system === sys).length ?? 0;
+                  return (
+                    <button
+                      key={sys}
+                      type="button"
+                      className={`sys-pill ${selectedSystem === sys ? "active" : ""}`}
+                      onClick={() => setSelectedSystem(sys)}
+                    >
+                      {sys} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {catalogOrgans.length === 0 ? (
+              <div className="library-empty-state">
+                <p>{locale === "ru" ? "Органы не найдены" : "No matching organs found"}</p>
+              </div>
+            ) : (
+              <div className="library-catalog-grid">
+                {catalogOrgans.map((item) => {
+                  const isSaved = progress.saved.includes(item.id);
+                  const isCurrent = item.id === organ.id;
+                  return (
+                    <div
+                      key={item.id}
+                      className={`library-catalog-card ${isCurrent ? "active-specimen" : ""}`}
+                      onClick={() => {
+                        onSelectOrgan?.(item.id);
+                        onClose();
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelectOrgan?.(item.id);
+                          onClose();
+                        }
+                      }}
+                    >
+                      <div className="catalog-thumb">
+                        <OrganArt organ={item} asset="thumb" alt="" size={58} />
+                      </div>
+                      <div className="catalog-body">
+                        <div className="catalog-title-row">
+                          <h4>{item.name}</h4>
+                          <button
+                            type="button"
+                            className={`catalog-bookmark ${isSaved ? "saved" : ""}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              progressStore.toggleSaved(item.id);
+                            }}
+                            title={isSaved ? "Remove bookmark" : "Bookmark specimen"}
+                            aria-label={isSaved ? "Remove bookmark" : "Bookmark specimen"}
+                          >
+                            <Bookmark size={15} fill={isSaved ? "currentColor" : "none"} />
+                          </button>
+                        </div>
+                        <em className="catalog-scientific">{item.scientificName}</em>
+                        <span className="catalog-system-pill">{item.system}</span>
+                        <p className="catalog-function">{item.function}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : type === "quiz" ? (
           <div className="quiz-container" style={{ textAlign: "left", width: "100%", marginTop: "1rem" }}>
             {organQuestions.length === 0 ? (
               <div style={{ textAlign: "center", padding: "1.5rem 0" }}>

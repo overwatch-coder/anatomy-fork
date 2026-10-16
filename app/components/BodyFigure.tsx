@@ -94,6 +94,10 @@ export function BodyFigure({
       <OrganShape id="tongue" label={label("tongue")} dimmed={isDimmed("tongue")} onSelectOrgan={onSelectOrgan}>
         <ellipse cx={150} cy={80} rx={11} ry={7} fill="currentColor" />
       </OrganShape>
+      <OrganShape id="palatine-tonsil" label={label("palatine-tonsil")} dimmed={isDimmed("palatine-tonsil")} onSelectOrgan={onSelectOrgan}>
+        <circle cx={142} cy={86} r={2.8} fill="currentColor" />
+        <circle cx={158} cy={86} r={2.8} fill="currentColor" />
+      </OrganShape>
       <OrganShape id="larynx" label={label("larynx")} dimmed={isDimmed("larynx")} onSelectOrgan={onSelectOrgan}>
         <rect x={144} y={93} width={12} height={13} rx={4} fill="currentColor" />
       </OrganShape>
@@ -104,6 +108,9 @@ export function BodyFigure({
       </OrganShape>
       <OrganShape id="trachea" label={label("trachea")} dimmed={isDimmed("trachea")} onSelectOrgan={onSelectOrgan}>
         <line x1={150} y1={108} x2={150} y2={142} stroke="currentColor" strokeWidth={5.5} />
+      </OrganShape>
+      <OrganShape id="main-bronchus" label={label("main-bronchus")} dimmed={isDimmed("main-bronchus")} onSelectOrgan={onSelectOrgan}>
+        <path d="M150,140 L142,148 M150,140 L158,148" stroke="currentColor" strokeWidth={3.5} strokeLinecap="round" />
       </OrganShape>
       <OrganShape id="esophagus" label={label("esophagus")} dimmed={isDimmed("esophagus")} onSelectOrgan={onSelectOrgan}>
         <line x1={155} y1={108} x2={157} y2={142} stroke="currentColor" strokeWidth={4.5} opacity={0.8} />
@@ -121,6 +128,12 @@ export function BodyFigure({
       <OrganShape id="thymus" label={label("thymus")} dimmed={isDimmed("thymus")} onSelectOrgan={onSelectOrgan}>
         <ellipse cx={137} cy={128} rx={7} ry={11} fill="currentColor" />
         <ellipse cx={163} cy={128} rx={7} ry={11} fill="currentColor" />
+      </OrganShape>
+      <OrganShape id="manubrium" label={label("manubrium")} dimmed={isDimmed("manubrium")} onSelectOrgan={onSelectOrgan}>
+        <path d="M145,116 L155,116 L153,124 L147,124 Z" fill="currentColor" />
+      </OrganShape>
+      <OrganShape id="sternum" label={label("sternum")} dimmed={isDimmed("sternum")} onSelectOrgan={onSelectOrgan}>
+        <rect x={148} y={126} width={4} height={32} rx={1.5} fill="currentColor" />
       </OrganShape>
       <OrganShape id="lungs" label={label("lungs")} dimmed={isDimmed("lungs")} onSelectOrgan={onSelectOrgan}>
         <ellipse cx={118} cy={152} rx={17} ry={40} fill="currentColor" transform="rotate(-8 118 152)" />
@@ -160,6 +173,19 @@ export function BodyFigure({
         <ellipse cx={128} cy={250} rx={7} ry={12} fill="currentColor" />
         <ellipse cx={172} cy={250} rx={7} ry={12} fill="currentColor" />
       </OrganShape>
+      <OrganShape id="renal-pelvis" label={label("renal-pelvis")} dimmed={isDimmed("renal-pelvis")} onSelectOrgan={onSelectOrgan}>
+        <circle cx={133} cy={250} r={2.5} fill="currentColor" />
+        <circle cx={167} cy={250} r={2.5} fill="currentColor" />
+      </OrganShape>
+      <OrganShape id="ureter" label={label("ureter")} dimmed={isDimmed("ureter")} onSelectOrgan={onSelectOrgan}>
+        <path d="M133,253 Q138,280 146,308 M167,253 Q162,280 154,308" fill="none" stroke="currentColor" strokeWidth={2} strokeDasharray="2 2" />
+      </OrganShape>
+      <OrganShape id="omentum" label={label("omentum")} dimmed={isDimmed("omentum")} onSelectOrgan={onSelectOrgan}>
+        <path d="M130,238 Q150,236 170,238 Q174,265 150,270 Q126,265 130,238 Z" fill="none" stroke="currentColor" strokeWidth={2} strokeDasharray="3 2" opacity={0.85} />
+      </OrganShape>
+      <OrganShape id="large-intestine" label={label("large-intestine")} dimmed={isDimmed("large-intestine")} onSelectOrgan={onSelectOrgan}>
+        <path d="M120,285 L120,248 Q150,244 180,248 L180,285" fill="none" stroke="currentColor" strokeWidth={5} strokeLinecap="round" opacity={0.8} />
+      </OrganShape>
       <OrganShape id="intestine" label={label("intestine")} dimmed={isDimmed("intestine")} onSelectOrgan={onSelectOrgan}>
         <ellipse cx={141} cy={263} rx={12} ry={9} fill="currentColor" />
         <ellipse cx={159} cy={265} rx={12} ry={9} fill="currentColor" />
@@ -167,8 +193,14 @@ export function BodyFigure({
       </OrganShape>
 
       {/* Pelvis */}
+      <OrganShape id="pelvis" label={label("pelvis")} dimmed={isDimmed("pelvis")} onSelectOrgan={onSelectOrgan}>
+        <path d="M118,318 C116,335 125,348 142,348 M182,318 C184,335 175,348 158,348" fill="none" stroke="currentColor" strokeWidth={4} strokeLinecap="round" />
+      </OrganShape>
       <OrganShape id="bladder" label={label("bladder")} dimmed={isDimmed("bladder")} onSelectOrgan={onSelectOrgan}>
         <ellipse cx={150} cy={312} rx={12} ry={10} fill="currentColor" />
+      </OrganShape>
+      <OrganShape id="fallopian-tube" label={label("fallopian-tube")} dimmed={isDimmed("fallopian-tube")} onSelectOrgan={onSelectOrgan}>
+        <path d="M133,324 Q141,318 147,326 M167,324 Q159,318 153,326" fill="none" stroke="currentColor" strokeWidth={2} />
       </OrganShape>
       <OrganShape id="ovary" label={label("ovary")} dimmed={isDimmed("ovary")} onSelectOrgan={onSelectOrgan}>
         <circle cx={133} cy={324} r={4.5} fill="currentColor" />
@@ -179,6 +211,9 @@ export function BodyFigure({
       </OrganShape>
       <OrganShape id="prostate" label={label("prostate")} dimmed={isDimmed("prostate")} onSelectOrgan={onSelectOrgan}>
         <ellipse cx={150} cy={344} rx={6.5} ry={5.5} fill="currentColor" />
+      </OrganShape>
+      <OrganShape id="urethra" label={label("urethra")} dimmed={isDimmed("urethra")} onSelectOrgan={onSelectOrgan}>
+        <line x1={150} y1={346} x2={150} y2={358} stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" />
       </OrganShape>
       <OrganShape id="testis" label={label("testis")} dimmed={isDimmed("testis")} onSelectOrgan={onSelectOrgan}>
         <ellipse cx={150} cy={356} rx={12} ry={9} fill="currentColor" opacity={0.85} />
@@ -196,6 +231,10 @@ export function BodyFigure({
         <line x1={196} y1={344} x2={198} y2={432} stroke="currentColor" strokeWidth={9} strokeLinecap="round" />
         <circle cx={102} cy={436} r={4.5} fill="currentColor" />
         <circle cx={198} cy={436} r={4.5} fill="currentColor" />
+      </OrganShape>
+      <OrganShape id="knee" label={label("knee")} dimmed={isDimmed("knee")} onSelectOrgan={onSelectOrgan}>
+        <ellipse cx={102} cy={444} rx={7} ry={4.5} fill="currentColor" />
+        <ellipse cx={198} cy={444} rx={7} ry={4.5} fill="currentColor" />
       </OrganShape>
     </svg>
   );

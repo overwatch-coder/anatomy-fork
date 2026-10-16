@@ -21,7 +21,7 @@ export interface AppHeaderProps {
   t?: UiDictionary;
   activePage?: NavPage;
   onBrandClick?: () => void;
-  onOpenModal?: (modal: "lesson" | "profile" | "quiz" | "compare" | "notes") => void;
+  onOpenModal?: (modal: "lesson" | "profile" | "quiz" | "compare" | "notes" | "library") => void;
   onToggleSaved?: () => void;
   showSavedOnly?: boolean;
   onOpenLibrary?: () => void;
@@ -122,7 +122,16 @@ export function AppHeader({
             </Link>
           )}
 
-          {onToggleSaved ? (
+          {onOpenModal ? (
+            <button
+              type="button"
+              onClick={() => onOpenModal("library")}
+              className={activePage === "library" ? "active" : ""}
+            >
+              <LibraryBig size={17} />
+              <span>{t?.nav?.library ?? "Library"}</span>
+            </button>
+          ) : onToggleSaved ? (
             <button
               type="button"
               onClick={onToggleSaved}

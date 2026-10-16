@@ -386,4 +386,124 @@ export const imaging: Record<OrganId, BilingualImaging> = {
         "Обзорные снимки диагностируют переломы и артроз. МРТ выявляет аваскулярный некроз и скрытые переломы; КТ используется для планирования операции.",
     },
   },
+  pelvis: {
+    en: {
+      modality: "X-ray · CT Pelvis · MRI",
+      note: "AP pelvic radiograph evaluates ring integrity and hip joints. High-resolution pelvic CT assesses complex fractures and surgical reduction.",
+    },
+    ru: {
+      modality: "Рентгенография · КТ таза · МРТ",
+      note: "Обзорная рентгенограмма таза оценивает целостность костного кольца. КТ выявляет скрытые переломы крестца и смещение вертлужной впадины.",
+    },
+  },
+  knee: {
+    en: {
+      modality: "MRI Knee · Weight-bearing X-ray",
+      note: "Standing radiographs evaluate joint space narrowing and osteoarthritis. MRI is the gold standard for meniscal tears and cruciate ligament tears.",
+    },
+    ru: {
+      modality: "МРТ коленного сустава · Рентгенография с нагрузкой",
+      note: "Рентген под нагрузкой выявляет сужение суставной щели при гонартрозе. МРТ — золотой стандарт визуализации разрывов менисков и связок.",
+    },
+  },
+  sternum: {
+    en: {
+      modality: "Lateral X-ray · Thoracic CT",
+      note: "Lateral sternal radiographs reliably reveal traumatic fractures. Thin-slice chest CT assesses sternotomy non-union, osteomyelitis, and retrosternal hematoma.",
+    },
+    ru: {
+      modality: "Боковая рентгенография · КТ грудной клетки",
+      note: "Боковые снимки грудины надёжно выявляют переломы. КТ высокого разрешения визуализирует расхождение краев после стернотомии и остеомиелит.",
+    },
+  },
+  manubrium: {
+    en: {
+      modality: "CT Thoracic Inlet · MRI Sternoclavicular",
+      note: "CT with contrast accurately identifies posterior sternoclavicular dislocations threatening retrosternal mediastinal vascular structures.",
+    },
+    ru: {
+      modality: "КТ верхней апертуры · МРТ грудино-ключичного сустава",
+      note: "КТ с контрастированием исключает компрессию дуги аорты и вен при задних вывихах грудино-ключичного сустава.",
+    },
+  },
+  "main-bronchus": {
+    en: {
+      modality: "Chest CT · Flexible Bronchoscopy",
+      note: "Contrast-enhanced chest CT displays bronchial lumen patency and wall thickening. Bronchoscopy allows direct mucosal visualization and biopsy.",
+    },
+    ru: {
+      modality: "КТ органов грудной клетки · Бронхоскопия",
+      note: "КТ грудной клетки демонстрирует проходимость бронхов и инфильтрацию стенок. Бронхоскопия позволяет осмотреть слизистую и взять биопсию.",
+    },
+  },
+  "palatine-tonsil": {
+    en: {
+      modality: "Neck CT with Contrast · Clinical Inspection",
+      note: "Direct inspection with headlight evaluates tonsillar exudates and asymmetry. Contrast neck CT detects deep peritonsillar and parapharyngeal abscesses.",
+    },
+    ru: {
+      modality: "КТ шеи с контрастом · Фарингоскопия",
+      note: "Осмотр ротоглотки оценивает налёты и гипертрофию. КТ шеи с контрастированием незаменима для диагностики паратонзиллярных абсцессов.",
+    },
+  },
+  "fallopian-tube": {
+    en: {
+      modality: "Hysterosalpingography (HSG) · Pelvic Ultrasound",
+      note: "Fluoroscopic HSG evaluates tubal patency and contour. Transvaginal Doppler ultrasound identifies ectopic gestational sacs and hydrosalpinx.",
+    },
+    ru: {
+      modality: "Гистеросальпингография (ГСГ) · Трансвагинальное УЗИ",
+      note: "Рентгеновская ГСГ оценивает проходимость маточных труб при бесплодии. Трансвагинальное УЗИ выявляет гидросальпинкс и внематочную беременность.",
+    },
+  },
+  ureter: {
+    en: {
+      modality: "Non-contrast CT KUB · Ultrasound",
+      note: "Unenhanced low-dose CT of kidneys, ureters, and bladder (CT KUB) is the definitive modality for detecting calcified ureteral calculi.",
+    },
+    ru: {
+      modality: "Бесконтрастная КТ почек и мочеточников · УЗИ",
+      note: "Низкодозная КТ мочевыделительной системы — эталон выявления конкрементов в мочеточнике при почечной колике.",
+    },
+  },
+  urethra: {
+    en: {
+      modality: "Retrograde Urethrography (RUG) · Voiding Cystourethrography (VCUG)",
+      note: "Dynamic retrograde urethrography demonstrates the exact length and location of urethral strictures, tears, and diverticula.",
+    },
+    ru: {
+      modality: "Ретроградная уретрография · Микционная цистоуретрография",
+      note: "Ретроградная уретрография даёт чёткое изображение стриктур, разрывов при травмах таза и дивертикулов канала.",
+    },
+  },
+  "renal-pelvis": {
+    en: {
+      modality: "Renal Ultrasound · CT Urography",
+      note: "Ultrasound quickly visualizes pelvicalyceal dilatation in hydronephrosis. CT urography provides complete three-dimensional maps of collecting system anatomy.",
+    },
+    ru: {
+      modality: "УЗИ почек · КТ-урография с контрастом",
+      note: "УЗИ быстро определяет расширение лоханки при обструкции. КТ-урография детально картирует анатомию чашечно-лоханочной системы.",
+    },
+  },
+  "large-intestine": {
+    en: {
+      modality: "Colonoscopy · Abdominal CT · Barium Enema",
+      note: "Optical colonoscopy provides direct endoscopic mucosa inspection and polypectomy. Abdominopelvic CT identifies diverticulitis and bowel wall thickening.",
+    },
+    ru: {
+      modality: "Колоноскопия · КТ брюшной полости · Ирригоскопия",
+      note: "Колоноскопия — золотой стандарт выявления полипов и опухолей. КТ брюшной полости подтверждает дивертикулит и кишечную непроходимость.",
+    },
+  },
+  omentum: {
+    en: {
+      modality: "Contrast-enhanced Abdominopelvic CT",
+      note: "Multidetector CT accurately detects omental infarction, focal fat stranding, omental torsion, and diffuse peritoneal carcinomatosis ('omental caking').",
+    },
+    ru: {
+      modality: "КТ брюшной полости с внутривенным контрастированием",
+      note: "КТ с контрастом визуализирует инфаркт и заворот сальника, тяжистость клетчатки и метастатический «сальниковый пирог».",
+    },
+  },
 };

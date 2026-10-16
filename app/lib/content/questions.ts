@@ -1805,6 +1805,534 @@ export const quizBank: Record<OrganId, BilingualQuestion[]> = {
       },
     },
   ],
+  pelvis: [
+    {
+      en: {
+        prompt: "Which three fused bones form each hip bone (os coxae) in the adult pelvis?",
+        options: ["Ilium, ischium, and pubis", "Femur, sacrum, and coccyx", "Patella, tibia, and fibula", "Atlas, axis, and sacrum"],
+        correct: 0,
+        explanation: "Each adult hip bone forms by the fusion of the ilium, ischium, and pubis at the acetabulum.",
+      },
+      ru: {
+        prompt: "Какие три сросшиеся кости образуют тазовую кость у взрослого человека?",
+        options: ["Подвздошная, седалищная и лобковая", "Бедренная, крестец и копчик", "Надколенник, большеберцовая и малоберцовая", "Атлант, осевой и крестец"],
+        correct: 0,
+        explanation: "Тазовая кость взрослого образуется сращением подвздошной, седалищной и лобковой костей в области вертлужной впадины.",
+      },
+    },
+    {
+      en: {
+        prompt: "How does the anatomical female pelvis typically differ from the male pelvis?",
+        options: ["It has a wider, oval-shaped pelvic inlet adapted for childbirth", "It is significantly heavier and narrower", "It has a heart-shaped pelvic brim", "It completely lacks a pubic symphysis"],
+        correct: 0,
+        explanation: "The female pelvis has a wider, more circular/oval inlet, broader sciatic notches, and a wider pubic arch to facilitate child delivery.",
+      },
+      ru: {
+        prompt: "Чем женский таз анатомически отличается от мужского?",
+        options: ["Более широким и округлым входом, приспособленным к родам", "Он значительно тяжелее и уже", "Сердцевидным входом в малый таз", "Полным отсутствием лобкового симфиза"],
+        correct: 0,
+        explanation: "Женский таз шире, имеет более развёрнутые крылья подвздошных костей и широкий лобковый угол для прохождения плода при родах.",
+      },
+    },
+    {
+      en: {
+        prompt: "Which joint connects the pelvic girdle directly to the axial vertebral column?",
+        options: ["Sacroiliac joint", "Pubic symphysis", "Hip (acetabulofemoral) joint", "Glenohumeral joint"],
+        correct: 0,
+        explanation: "The sacroiliac joints firmly link the sacrum of the vertebral column to the iliac bones of the pelvis.",
+      },
+      ru: {
+        prompt: "Какой сустав непосредственно соединяет тазовый пояс с осевым скелетом?",
+        options: ["Крестцово-подвздошный сустав", "Лобковый симфиз", "Тазобедренный сустав", "Плечевой сустав"],
+        correct: 0,
+        explanation: "Крестцово-подвздошные суставы прочно связывают крестец позвоночника с подвздошными костями тазового пояса.",
+      },
+    },
+  ],
+  knee: [
+    {
+      en: {
+        prompt: "What is the primary function of the fibrocartilaginous menisci in the knee?",
+        options: ["Shock absorption and load distribution across femoral and tibial condyles", "Production of blood cells", "Anchoring the quadriceps tendon to the hip", "Secretion of synovial fluid into the bursa"],
+        correct: 0,
+        explanation: "The medial and lateral menisci act as shock absorbers and deepen the shallow tibial plateau to stabilize the femoral condyles.",
+      },
+      ru: {
+        prompt: "Какова главная функция волокнисто-хрящевых менисков коленного сустава?",
+        options: ["Амортизация и равномерное распределение нагрузки между мыщелками", "Продукция клеток крови", "Прикрепление сухожилия квадрицепса к тазу", "Секреция синовиальной жидкости в сумку"],
+        correct: 0,
+        explanation: "Медиальный и латеральный мениски служат амортизаторами и углубляют суставные поверхности большеберцовой кости.",
+      },
+    },
+    {
+      en: {
+        prompt: "Which major knee ligament prevents the tibia from sliding anteriorly beneath the femur?",
+        options: ["Anterior cruciate ligament (ACL)", "Posterior cruciate ligament (PCL)", "Fibular collateral ligament", "Patellar tendon"],
+        correct: 0,
+        explanation: "The anterior cruciate ligament (ACL) resists anterior translation of the tibia relative to the femur.",
+      },
+      ru: {
+        prompt: "Какая связка колена препятствует смещению голени вперёд относительно бедра?",
+        options: ["Передняя крестообразная связка (ПКС)", "Задняя крестообразная связка (ЗКС)", "Малоберцовая коллатеральная связка", "Связка надколенника"],
+        correct: 0,
+        explanation: "Передняя крестообразная связка удерживает большеберцовую кость от чрезмерного смещения вперёд относительно мыщелков бедра.",
+      },
+    },
+    {
+      en: {
+        prompt: "What type of bone is the patella (kneecap) categorized as anatomically?",
+        options: ["Sesamoid bone embedded within the quadriceps tendon", "Long tubular bone of the lower extremity", "Pneumatized cranial bone", "Irregular vertebral bone"],
+        correct: 0,
+        explanation: "The patella is the largest sesamoid bone in the body, embedded within the quadriceps femoris tendon.",
+      },
+      ru: {
+        prompt: "К какому типу костей относится надколенник (коленная чашечка)?",
+        options: ["Сесамовидная кость в толще сухожилия квадрицепса", "Длинная трубчатая кость ноги", "Воздухоносная кость черепа", "Губчатая кость позвоночника"],
+        correct: 0,
+        explanation: "Надколенник — самая крупная сесамовидная кость скелета человека, залегающая в сухожилии четырёхглавой мышцы бедра.",
+      },
+    },
+  ],
+  sternum: [
+    {
+      en: {
+        prompt: "Which anatomical landmark on the sternum marks the level of the second costal cartilage?",
+        options: ["Sternal angle (Angle of Louis)", "Xiphoid process", "Jugular notch", "Clavicular notch"],
+        correct: 0,
+        explanation: "The sternal angle marks the junction between manubrium and body and aligns with the second ribs and T4–T5 vertebrae.",
+      },
+      ru: {
+        prompt: "Какой анатомический ориентир грудины находится на уровне прикрепления хряща 2-го ребра?",
+        options: ["Угол грудины (угол Луи)", "Мечевидный отросток", "Яремная вырезка", "Ключичная вырезка"],
+        correct: 0,
+        explanation: "Угол грудины (угол Луи) — выступ на границе рукоятки и тела, служащий надёжным ориентиром для пальпации 2-го ребра.",
+      },
+    },
+    {
+      en: {
+        prompt: "How many pairs of 'true ribs' directly articulate with the sternum via costal cartilages?",
+        options: ["7 pairs (ribs 1–7)", "12 pairs", "10 pairs", "5 pairs"],
+        correct: 0,
+        explanation: "Ribs 1 through 7 are true ribs (vertebrosternal) because their costal cartilages articulate directly with the sternum.",
+      },
+      ru: {
+        prompt: "Сколько пар истинных рёбер непосредственно прикрепляются к грудине своими хрящами?",
+        options: ["7 пар (1–7 рёбра)", "12 пар", "10 пар", "5 пар"],
+        correct: 0,
+        explanation: "Первые 7 пар рёбер называются истинными, поскольку они напрямую соединяются своими реберными хрящами с грудиной.",
+      },
+    },
+    {
+      en: {
+        prompt: "Why is the sternum frequently utilized for bone marrow aspirations in clinical practice?",
+        options: ["It retains active hematopoietic red marrow throughout adult life and is easily accessible", "It has no nerve supply so it is painless", "It is composed entirely of hollow cartilage", "It produces all mature lymphocytes"],
+        correct: 0,
+        explanation: "The sternum contains active red marrow under a thin cortical bone plate, making it an accessible biopsy site.",
+      },
+      ru: {
+        prompt: "Почему грудина часто используется в клинике для пункции костного мозга?",
+        options: ["Она сохраняет кроветворный красный костный мозг у взрослых и легко доступна", "В ней нет нервов, поэтому пункция безболезненна", "Она состоит только из хряща", "Она производит все зрелые лимфоциты"],
+        correct: 0,
+        explanation: "Грудина содержит активный красный мозг под тонкой компактной пластинкой, что делает стернальную пункцию доступной диагностической процедурой.",
+      },
+    },
+  ],
+  manubrium: [
+    {
+      en: {
+        prompt: "Which pair of bones articulates with the superolateral notches of the manubrium?",
+        options: ["Clavicles (collarbones)", "Scapulae", "Humeri", "First thoracic vertebrae"],
+        correct: 0,
+        explanation: "The clavicular notches on the superolateral borders of the manubrium articulate with the sternal ends of the clavicles.",
+      },
+      ru: {
+        prompt: "Какие кости сочленяются с верхнелатеральными вырезками рукоятки грудины?",
+        options: ["Ключицы", "Лопатки", "Плечевые кости", "Первые грудные позвонки"],
+        correct: 0,
+        explanation: "Ключичные вырезки по бокам верхнего края рукоятки образуют грудино-ключичные суставы с концами ключиц.",
+      },
+    },
+    {
+      en: {
+        prompt: "What major cardiovascular structure lies immediately posterior to the manubrium?",
+        options: ["Aortic arch and great vessels (brachiocephalic trunk, left carotid, subclavian)", "Left ventricle", "Inferior vena cava", "Abdominal aorta"],
+        correct: 0,
+        explanation: "The aortic arch and its three branches lie directly behind the protective bone plate of the manubrium.",
+      },
+      ru: {
+        prompt: "Какая крупная сосудистая структура располагается непосредственно позади рукоятки грудины?",
+        options: ["Дуга аорты и её главные ветви (плечеголовной ствол, сонная и подключичная артерии)", "Левый желудочек", "Нижняя полая вена", "Брюшная аорта"],
+        correct: 0,
+        explanation: "Дуга аорты и отходящие от неё сосуды лежат непосредственно за костной защитой рукоятки грудины в верхнем средостении.",
+      },
+    },
+    {
+      en: {
+        prompt: "What is the easily palpable depression located on the superior border of the manubrium?",
+        options: ["Jugular (suprasternal) notch", "Costal groove", "Xiphoid notch", "Infraglenoid tubercle"],
+        correct: 0,
+        explanation: "The jugular (suprasternal) notch is the central dip between the two clavicular joints at the base of the throat.",
+      },
+      ru: {
+        prompt: "Какое легко пальпируемое углубление находится на верхнем крае рукоятки грудины?",
+        options: ["Яремная (надгрудинная) вырезка", "Реберная борозда", "Мечевидная ямка", "Подсуставной бугорок"],
+        correct: 0,
+        explanation: "Яремная вырезка — срединное углубление между ключичными суставами в яремной ямке у основания шеи.",
+      },
+    },
+  ],
+  "main-bronchus": [
+    {
+      en: {
+        prompt: "Why do aspirated foreign objects lodge more frequently in the right main bronchus than the left?",
+        options: ["The right bronchus is wider, shorter, and more vertical", "The left bronchus is completely closed by a valve", "The right bronchus lacks cilia", "The right lung has fewer lobes"],
+        correct: 0,
+        explanation: "The right main bronchus is wider and runs more vertically directly in line with the trachea, so inhaled items easily enter it.",
+      },
+      ru: {
+        prompt: "Почему аспирированные инородные тела чаще попадают в правый главный бронх, чем в левый?",
+        options: ["Правый бронх шире, короче и направлен более вертикально", "Левый бронх наглухо закрыт клапаном", "В правом бронхе нет ресничек", "В правом лёгком меньше долей"],
+        correct: 0,
+        explanation: "Правый главный бронх шире и отходит от трахеи под более крутым углом, являясь как бы прямым продолжением трахеи.",
+      },
+    },
+    {
+      en: {
+        prompt: "What is the internal ridge located at the bifurcation of the trachea called?",
+        options: ["Carina", "Hilum", "Uvula", "Vallecula"],
+        correct: 0,
+        explanation: "The carina is the internal cartilaginous ridge between the openings of the right and left primary bronchi.",
+      },
+      ru: {
+        prompt: "Как называется внутренний хрящевой гребень в месте разделения трахеи на бронхи?",
+        options: ["Киль трахеи (карина)", "Ворота", "Язычок", "Валлекула"],
+        correct: 0,
+        explanation: "Карина (киль) трахеи — высокочувствительный хрящевой гребень на стыке устьев главных бронхов, вызывающий кашлевой рефлекс.",
+      },
+    },
+    {
+      en: {
+        prompt: "What prevents the main bronchi from collapsing during forced expiration?",
+        options: ["C-shaped or complete hyaline cartilaginous rings", "High arterial blood pressure", "Thick skeletal muscle fibers", "Surfactant fluid alone"],
+        correct: 0,
+        explanation: "Hyaline cartilage in the walls of the main bronchi keeps their lumen patent during thoracic pressure changes.",
+      },
+      ru: {
+        prompt: "Что предотвращает спадение стенок главных бронхов при форсированном выдохе?",
+        options: ["Гиалиновые хрящевые полукольца и пластинки", "Высокое артериальное давление", "Скелетные мышечные волокна", "Исключительно слой сурфактанта"],
+        correct: 0,
+        explanation: "Хрящевой остов из гиалинового хряща обеспечивает постоянный открытый просвет бронхов при перепадах внутригрудного давления.",
+      },
+    },
+  ],
+  "palatine-tonsil": [
+    {
+      en: {
+        prompt: "In which anatomical compartment are the palatine tonsils located?",
+        options: ["Tonsillar fossa of the lateral oropharynx", "Nasopharynx roof", "Submandibular triangle", "Laryngeal vestibule"],
+        correct: 0,
+        explanation: "The palatine tonsils sit in the tonsillar fossa between the palatoglossal and palatopharyngeal arches of the oropharynx.",
+      },
+      ru: {
+        prompt: "В каком анатомическом пространстве расположены нёбные миндалины?",
+        options: ["В миндаликовой ямке боковой стенки ротоглотки", "В своде носоглотки", "В поднижнечелюстном треугольнике", "В преддверии гортани"],
+        correct: 0,
+        explanation: "Нёбные миндалины лежат в миндаликовых нишах между небно-язычной и небно-глоточной дужками ротоглотки.",
+      },
+    },
+    {
+      en: {
+        prompt: "What is the primary immunological role of tonsillar crypts?",
+        options: ["To maximize surface contact between lymphocytes and ingested/inhaled pathogens", "To produce digestive pepsin", "To secrete lubricating saliva", "To drain lymph into the thoracic duct"],
+        correct: 0,
+        explanation: "Deep invaginated crypts allow inhaled and swallowed antigens to contact underlying lymphoid follicles and stimulate mucosal immunity.",
+      },
+      ru: {
+        prompt: "Какова основная иммунологическая роль миндаликовых крипт?",
+        options: ["Увеличение площади контакта лимфоцитов с микроорганизмами из пищи и воздуха", "Продукция пищеварительного пепсина", "Секреция слюны для смачивания пищи", "Отток лимфы в грудной проток"],
+        correct: 0,
+        explanation: "Глубокие ветвящиеся крипты многократно увеличивают площадь контакта антигенов с иммунокомпетентными клетками миндалины.",
+      },
+    },
+    {
+      en: {
+        prompt: "The palatine tonsils are prominent components of which lymphoid defense ring?",
+        options: ["Waldeyer's tonsillar ring", "Circle of Willis", "Femoral ring", "Anulus fibrosus"],
+        correct: 0,
+        explanation: "Waldeyer's pharyngeal ring consists of the palatine, pharyngeal (adenoid), lingual, and tubal tonsils protecting the aerodigestive tract.",
+      },
+      ru: {
+        prompt: "Компонентом какого лимфоидного защитного кольца глотки являются нёбные миндалины?",
+        options: ["Лимфоэпителиального кольца Пирогова–Вальдейера", "Виллизиева круга", "Бедренного кольца", "Фиброзного кольца сердца"],
+        correct: 0,
+        explanation: "Кольцо Пирогова–Вальдейера окружает вход в дыхательные и пищеварительные пути, защищая организм от респираторных и алиментарных инфекций.",
+      },
+    },
+  ],
+  "fallopian-tube": [
+    {
+      en: {
+        prompt: "In which anatomical segment of the fallopian tube does fertilization typically take place?",
+        options: ["Ampulla", "Isthmus", "Infundibulum", "Interstitium"],
+        correct: 0,
+        explanation: "Fertilization of the oocyte by a sperm cell most commonly occurs within the wider ampulla of the fallopian tube.",
+      },
+      ru: {
+        prompt: "В каком анатомическом отделе маточной трубы обычно происходит оплодотворение?",
+        options: ["Ампула", "Перешеек (истмус)", "Воронка", "Маточная часть"],
+        correct: 0,
+        explanation: "Оплодотворение яйцеклетки сперматозоидом чаще всего происходит в самом широком ампулярном отделе маточной трубы.",
+      },
+    },
+    {
+      en: {
+        prompt: "What structures on the infundibulum sweep over the ovary to capture the ovulated egg?",
+        options: ["Fimbriae", "Microvilli", "Flagella", "Haustra"],
+        correct: 0,
+        explanation: "The fimbriae are fringe-like finger projections at the distal end of the tube that guide the released egg into the tubal lumen.",
+      },
+      ru: {
+        prompt: "Какие структуры на конце воронки маточной трубы захватывают вышедшую яйцеклетку?",
+        options: ["Фимбрии (бахромки)", "Микроворсинки", "Жгутики", "Гаустры"],
+        correct: 0,
+        explanation: "Бахромки (фимбрии) воронки трубы совершают волнообразные движения над яичником, направляя ооцит в просвет воронки.",
+      },
+    },
+    {
+      en: {
+        prompt: "What mechanism primarily moves the fertilized blastocyst toward the uterine cavity?",
+        options: ["Coordinated epithelial ciliary beating and smooth muscle peristalsis", "Passive gravity drainage", "High arterial blood pressure pulses", "Centrifugal force from pelvic movement"],
+        correct: 0,
+        explanation: "Ciliated epithelial cells beating toward the uterus together with gentle muscular contractions propel the embryo over 3–4 days.",
+      },
+      ru: {
+        prompt: "Какой механизм главным образом продвигает оплодотворённую яйцеклетку в матку?",
+        options: ["Синхронное биение ресничек эпителия и перистальтика мышечной стенки", "Пассивное стекание под действием гравитации", "Пульсация артериального давления", "Центробежная сила при движениях таза"],
+        correct: 0,
+        explanation: "Реснички мерцательного эпителия создают ток жидкости к матке, а гладкие мышцы трубы продвигают зародыш волнообразными сокращениями.",
+      },
+    },
+  ],
+  ureter: [
+    {
+      en: {
+        prompt: "How is urine actively transported through the ureters into the urinary bladder?",
+        options: ["Rhythmic peristaltic smooth muscle contractions", "Passive gravity flow only", "Hydrostatic capillary pressure", "Negative suction pressure from the urethra"],
+        correct: 0,
+        explanation: "Smooth muscle in the ureteral wall produces rhythmic peristaltic waves that pump urine spurts down into the bladder.",
+      },
+      ru: {
+        prompt: "Каким образом моча активно транспортируется по мочеточникам в мочевой пузырь?",
+        options: ["Ритмическими перистальтическими сокращениями гладких мышц стенки", "Только пассивным стеканием под силой тяжести", "Гидростатическим давлением капилляров", "Отрицательным давлением из уретры"],
+        correct: 0,
+        explanation: "Гладкая мускулатура мочеточника совершает волнообразные перистальтические сокращения, проталкивая порции мочи даже в положении лёжа.",
+      },
+    },
+    {
+      en: {
+        prompt: "What physiological mechanism prevents backflow of urine from the bladder into the ureter?",
+        options: ["The oblique intramural passage of the ureter through the bladder wall", "A mechanical bicuspid valve with chordae", "A permanent skeletal muscle ring", "High venous pressure in the detrusor"],
+        correct: 0,
+        explanation: "As the bladder fills, internal intravesical pressure compresses the oblique intramural ureter, creating a natural anti-reflux valve.",
+      },
+      ru: {
+        prompt: "Какой механизм препятствует обратному забросу мочи из мочевого пузыря в мочеточник?",
+        options: ["Косой интрамуральный ход мочеточника в толще стенки пузыря", "Двустворчатый механический клапан с хордами", "Постоянный сфинктер из поперечнополосатых мышц", "Высокое венозное давление в стенке"],
+        correct: 0,
+        explanation: "При наполнении пузыря поднимающееся давление сдавливает косо проходящий в стенке канал мочеточника, закрывая его просвет.",
+      },
+    },
+    {
+      en: {
+        prompt: "Where are the three classical anatomical sites of ureteral narrowing where stones often lodge?",
+        options: ["Pelviureteric junction, pelvic brim crossing, and ureterovesical junction", "Renal cortex, glomerulus, and loop of Henle", "Prostatic urethra, membranous urethra, and meatus", "Superior vena cava, carina, and hilum"],
+        correct: 0,
+        explanation: "Renal calculi commonly impact at the pelviureteric junction (PUJ), where crossing the iliac vessels at the pelvic brim, or at the ureterovesical junction (UVJ).",
+      },
+      ru: {
+        prompt: "В каких трёх анатомических сужениях мочеточника чаще всего застревают почечные камни?",
+        options: ["Лоханочно-мочеточниковый сегмент, перекрёст с подвздошными сосудами и вход в пузырь", "Корковое вещество, клубочек и петля Генле", "Простатическая уретра, наружный сфинктер и меатус", "Верхняя полая вена, киль и ворота"],
+        correct: 0,
+        explanation: "Камни чаще всего вклиниваются на выходе из лоханки, при перегибе через подвздошные сосуды на границе таза и в стенке пузыря.",
+      },
+    },
+  ],
+  urethra: [
+    {
+      en: {
+        prompt: "Which sphincter surrounding the urethra is under voluntary somatic motor control?",
+        options: ["External urethral sphincter (via pudendal nerve)", "Internal urethral sphincter", "Sphincter of Oddi", "Pyloric sphincter"],
+        correct: 0,
+        explanation: "The external urethral sphincter in the deep perineal pouch is striated skeletal muscle innervated by the somatic pudendal nerve, allowing voluntary continence.",
+      },
+      ru: {
+        prompt: "Какой сфинктер мочеиспускательного канала находится под произвольным соматическим контролем человека?",
+        options: ["Наружный сфинктер уретры (иннервация половым нервом)", "Внутренний сфинктер уретры", "Сфинктер Одди", "Пилорический сфинктер желудка"],
+        correct: 0,
+        explanation: "Наружный сфинктер уретры образован поперечнополосатой мускулатурой промежности и управляется произвольно через половой нерв.",
+      },
+    },
+    {
+      en: {
+        prompt: "Why are females anatomically much more susceptible to ascending cystitis (bladder infections)?",
+        options: ["The female urethra is significantly shorter (~4 cm vs ~20 cm in males)", "Females lack transitional epithelium", "Females have no internal sphincter", "The female bladder holds less urine"],
+        correct: 0,
+        explanation: "The short length of the female urethra provides a much shorter transit path for external bacteria to migrate into the bladder.",
+      },
+      ru: {
+        prompt: "Почему женщины анатомически более предрасположены к развитию восходящего цистита?",
+        options: ["Женская уретра значительно короче и шире мужской (~4 см против ~20 см)", "У женщин отсутствует переходный эпителий", "У женщин нет внутреннего сфинктера", "Женский мочевой пузырь вмещает меньше мочи"],
+        correct: 0,
+        explanation: "Короткая протяжённость женского мочеиспускательного канала облегчает проникновение периуретральной микрофлоры в полость пузыря.",
+      },
+    },
+    {
+      en: {
+        prompt: "Which segment of the male urethra receives secretions from the ejaculatory ducts and prostate gland?",
+        options: ["Prostatic urethra", "Spongy (penile) urethra", "Membranous urethra", "Navicular fossa"],
+        correct: 0,
+        explanation: "The prostatic urethra traverses the prostate gland; the seminal colliculus contains openings for the ejaculatory ducts and prostatic sinuses.",
+      },
+      ru: {
+        prompt: "В какой отдел мужской уретры открываются семявыносящие протоки и протоки предстательной железы?",
+        options: ["Простатическая часть", "Губчатая часть", "Перепончатая часть", "Ладьевидная ямка"],
+        correct: 0,
+        explanation: "В простатической части уретры на семенном бугорке открываются отверстия семявыбрасывающих протоков и протоков долек простаты.",
+      },
+    },
+  ],
+  "renal-pelvis": [
+    {
+      en: {
+        prompt: "What anatomical structures directly empty urine into the renal pelvis?",
+        options: ["Major calyces (calices majores)", "Collecting ducts of Bellini directly", "Urethra", "Renal cortex columns"],
+        correct: 0,
+        explanation: "Urine drains from minor calyces into two or three major calyces, which combine to form the expanded renal pelvis funnel.",
+      },
+      ru: {
+        prompt: "Какие анатомические структуры непосредственно опорожняют мочу в почечную лоханку?",
+        options: ["Большие почечные чашечки", "Сосочковые протоки Беллини напрямую", "Мочеиспускательный канал", "Почечные столбы Бертена"],
+        correct: 0,
+        explanation: "Малые чашечки сливаются в 2–3 большие почечные чашечки, которые объединяются в общую воронку лоханки.",
+      },
+    },
+    {
+      en: {
+        prompt: "What is the medical term for severe bacterial infection and inflammation of the renal pelvis and kidney?",
+        options: ["Pyelonephritis", "Glomerulonephritis", "Cystitis", "Urethritis"],
+        correct: 0,
+        explanation: "Pyelonephritis is an inflammatory infection affecting the renal pelvis (pyelo-) and the renal nephron parenchyma.",
+      },
+      ru: {
+        prompt: "Как называется бактериальное воспаление почечной лоханки и паренхимы почки?",
+        options: ["Пиелонефрит", "Гломерулонефрит", "Цистит", "Уретрит"],
+        correct: 0,
+        explanation: "Пиелонефрит — инфекционно-воспалительное заболевание, поражающее почечную лоханку (pyelos) и интерстициальную ткань почки.",
+      },
+    },
+    {
+      en: {
+        prompt: "What clinical condition occurs when the pelviureteric junction (PUJ) is obstructed, causing the renal pelvis to swell with urine?",
+        options: ["Hydronephrosis", "Polycystic kidney disease", "Renal infarct", "Glomerulosclerosis"],
+        correct: 0,
+        explanation: "Hydronephrosis is the distension and dilation of the renal pelvis and calyces caused by obstruction to the outflow of urine.",
+      },
+      ru: {
+        prompt: "Какое патологическое состояние возникает при обструкции выхода из лоханки с перерастяжением почки мочой?",
+        options: ["Гидронефроз", "Поликистоз почек", "Инфаркт почки", "Гломерулосклероз"],
+        correct: 0,
+        explanation: "Гидронефроз — расширение чашечно-лоханочной системы почки с атрофией паренхимы из-за нарушения оттока мочи.",
+      },
+    },
+  ],
+  "large-intestine": [
+    {
+      en: {
+        prompt: "What are the three longitudinal ribbon bands of smooth muscle along the colon called?",
+        options: ["Teniae coli", "Haustra", "Epiploic appendages", "Peyer patches"],
+        correct: 0,
+        explanation: "Teniae coli are three distinct bands of longitudinal smooth muscle that bunch the colon wall into sacculations called haustra.",
+      },
+      ru: {
+        prompt: "Как называются три продольные мышечные ленты на поверхности ободочной кишки?",
+        options: ["Ленты ободочной кишки (teniae coli)", "Гаустры", "Сальниковые отростки", "Пейеровы бляшки"],
+        correct: 0,
+        explanation: "Ленты ободочной кишки (teniae coli) — пучки продольного мышечного слоя, стягивающие стенку кишки в мешковидные гаустры.",
+      },
+    },
+    {
+      en: {
+        prompt: "What is the primary physiological function of the large intestine?",
+        options: ["Absorption of water and electrolytes, and consolidation of feces", "Secretion of hydrochloric acid and pepsin", "Absorption of emulsified lipids via lacteals", "Production of bile salts"],
+        correct: 0,
+        explanation: "The colon absorbs roughly 90% of the remaining water and electrolytes entering from the ileum, dehydrating chyme into stool.",
+      },
+      ru: {
+        prompt: "В чём заключается основная физиологическая функция толстой кишки?",
+        options: ["Всасывание воды и электролитов, формирование каловых масс", "Секреция соляной кислоты и пепсина", "Всасывание расщеплённых жиров в лимфу", "Синтез солей жёлчных кислот"],
+        correct: 0,
+        explanation: "Толстая кишка всасывает около 90% оставшейся воды и минеральных солей, формируя плотные каловые массы.",
+      },
+    },
+    {
+      en: {
+        prompt: "What vestigial-lymphoid organ projects from the posteromedial wall of the caecum?",
+        options: ["Vermiform appendix", "Meckel diverticulum", "Palatine tonsil", "Spleen"],
+        correct: 0,
+        explanation: "The vermiform appendix is a narrow, blind tube rich in lymphoid tissue extending from the caecum near the ileocecal valve.",
+      },
+      ru: {
+        prompt: "Какой богатый лимфоидной тканью орган отходит от купола слепой кишки?",
+        options: ["Червеобразный отросток (аппендикс)", "Дивертикул Меккеля", "Нёбная миндалина", "Селезёнка"],
+        correct: 0,
+        explanation: "Червеобразный отросток (аппендикс) — трубчатый вырост слепой кишки, содержащий скопления лимфоидной ткани и служащий резервуаром микробиоты.",
+      },
+    },
+  ],
+  omentum: [
+    {
+      en: {
+        prompt: "Why is the greater omentum historically referred to as the 'abdominal policeman'?",
+        options: ["It migrates to sites of intra-abdominal inflammation to wrap and wall off infection", "It produces gastric acid to sterilize bowel contents", "It directly controls the voluntary abdominal wall muscles", "It acts as a physical barrier against external trauma only"],
+        correct: 0,
+        explanation: "Surgeons termed it the 'abdominal policeman' because its mobility and fibrin exudate seal perforations (like appendicitis), preventing generalized peritonitis.",
+      },
+      ru: {
+        prompt: "Почему большой сальник в хирургии образно называют «жандармом брюшной полости»?",
+        options: ["Он подпаивается к очагам воспаления, отграничивая инфекцию от брюшины", "Он выделяет соляную кислоту для стерилизации", "Он управляет мышцами брюшного пресса", "Он служит только подушкой при падениях"],
+        correct: 0,
+        explanation: "Большой сальник обладает подвижностью и богатым кровотоком: он мигрирует к перфорации или воспалению, склеиваясь фибрином и изолируя перитонит.",
+      },
+    },
+    {
+      en: {
+        prompt: "From which anatomical organs does the greater omentum suspend downward as an apron?",
+        options: ["Greater curvature of the stomach and transverse colon", "Inferior surface of the liver and gallbladder", "Duodenum and jejunum loops", "Urinary bladder and prostate"],
+        correct: 0,
+        explanation: "The greater omentum hangs down like an apron from the greater curvature of the stomach and connects to the transverse colon.",
+      },
+      ru: {
+        prompt: "От каких органов большой сальник спускается вниз в виде брюшинного фартука?",
+        options: ["От большой кривизны желудка и поперечной ободочной кишки", "От нижней поверхности печени и желчного пузыря", "От петель двенадцатиперстной и тощей кишки", "От мочевого пузыря и простаты"],
+        correct: 0,
+        explanation: "Большой сальник начинается четырьмя листками от большой кривизны желудка и срастается с поперечной ободочной кишкой, свисая над петлями кишок.",
+      },
+    },
+    {
+      en: {
+        prompt: "What are the specialized microscopic immunological macrophage clusters within the omentum called?",
+        options: ["Milky spots (milky spots of Ranvier)", "Peyer patches", "Islets of Langerhans", "Hassall corpuscles"],
+        correct: 0,
+        explanation: "Milky spots are dense submesothelial clusters of macrophages, lymphocytes, and plasma cells that filter peritoneal fluid and fight infection.",
+      },
+      ru: {
+        prompt: "Как называются микроскопические скопления макрофагов в ткани сальника, фильтрующие брюшинную жидкость?",
+        options: ["Млечные пятна (пятна Ранвье)", "Пейеровы бляшки", "Островки Лангерганса", "Тельца Гассаля"],
+        correct: 0,
+        explanation: "Млечные пятна — это лимфоидные скопления макрофагов и лимфоцитов в сальнике, обеспечивающие иммунную защиту и фагоцитоз в брюшной полости.",
+      },
+    },
+  ],
 };
 
 export const QUIZ_QUESTIONS_PER_ORGAN = 5;

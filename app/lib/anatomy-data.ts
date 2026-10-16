@@ -38,7 +38,19 @@ export type ExtraOrganId =
   | "spinal-cord"
   | "diaphragm"
   | "biceps"
-  | "femur";
+  | "femur"
+  | "pelvis"
+  | "knee"
+  | "sternum"
+  | "manubrium"
+  | "main-bronchus"
+  | "palatine-tonsil"
+  | "fallopian-tube"
+  | "ureter"
+  | "urethra"
+  | "renal-pelvis"
+  | "large-intestine"
+  | "omentum";
 
 export type OrganId = CoreOrganId | ExtraOrganId;
 

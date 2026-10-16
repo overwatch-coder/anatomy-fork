@@ -187,4 +187,52 @@ export const functionAnimations: Record<OrganId, BilingualAnimation> = {
       desc: "Эпидермис постоянно слущивается и обновляется — тихий непрерывный процесс.",
     },
   },
+  pelvis: {
+    en: { label: "Weight distribution", desc: "A stabilizing vector pulse illustrates how pelvic bones channel trunk weight to both legs." },
+    ru: { label: "Распределение веса", desc: "Пульс силовых линий показывает передачу веса туловища через таз на обе ноги." },
+  },
+  knee: {
+    en: { label: "Hinge flexion", desc: "A smooth articulate rotation demonstrates condylar gliding and meniscal shock absorption." },
+    ru: { label: "Сгибание сустава", desc: "Плавное движение мыщелков демонстрирует скольжение и амортизацию менисков." },
+  },
+  sternum: {
+    en: { label: "Pump-handle motion", desc: "A steady anterior-superior rise highlights sternal movement during deep inspiration." },
+    ru: { label: "Движение рукоятки насоса", desc: "Подъём грудины вверх и вперёд иллюстрирует расширение грудной клетки при вдохе." },
+  },
+  manubrium: {
+    en: { label: "Clavicular pivot", desc: "Subtle dual-pivot rotations illustrate forces transferred from arms into the torso." },
+    ru: { label: "Ключичный поворот", desc: "Вращение в грудино-ключичных суставах отражает передачу усилий от рук к туловищу." },
+  },
+  "main-bronchus": {
+    en: { label: "Airway conduit", desc: "Rhythmic alternating air stream flows branch from the trachea down into each lung." },
+    ru: { label: "Дыхательный поток", desc: "Ритмичный ток воздуха разделяется из трахеи по бронхиальным деревьям обоих лёгких." },
+  },
+  "palatine-tonsil": {
+    en: { label: "Antigen surveillance", desc: "Pulsing radial waves depict antigen sampling within crypts activating local lymphocyte pools." },
+    ru: { label: "Иммунный надзор", desc: "Радиальные импульсы показывают контакт патогенов в криптах с лимфоцитами." },
+  },
+  "fallopian-tube": {
+    en: { label: "Tubal peristalsis", desc: "A gentle synchronized wave carries the ovum along the tube toward the uterine horn." },
+    ru: { label: "Перистальтика трубы", desc: "Волнообразное сокращение продвигает яйцеклетку по трубе в сторону матки." },
+  },
+  ureter: {
+    en: { label: "Peristaltic pump", desc: "Sequential muscular contractions squeeze urine boluses downward toward the bladder." },
+    ru: { label: "Перистальтическая волна", desc: "Последовательные сокращения проталкивают порции мочи вниз в мочевой пузырь." },
+  },
+  urethra: {
+    en: { label: "Micturition flow", desc: "Sphincter relaxation followed by a clean laminar outward flow illustrates normal voiding." },
+    ru: { label: "Поток мочеиспускания", desc: "Расслабление сфинктера и свободный ток жидкости демонстрируют нормальное мочеиспускание." },
+  },
+  "renal-pelvis": {
+    en: { label: "Calyx funneling", desc: "Fluid convergences from collecting calyces channel smoothly into the funnel outlet." },
+    ru: { label: "Сбор мочи чашечками", desc: "Схождение потоков мочи из почечных чашечек в общую выходную воронку." },
+  },
+  "large-intestine": {
+    en: { label: "Haustral churning", desc: "Slow segmental contractions mix and advance luminal contents, optimizing water reclamation." },
+    ru: { label: "Гаустральное перемешивание", desc: "Медленные сегментарные сокращения перемешивают содержимое для максимального всасывания воды." },
+  },
+  omentum: {
+    en: { label: "Protective migration", desc: "A fluid defensive drape shifts flexibly over bowel loops to seal simulated irritation." },
+    ru: { label: "Защитное укрытие", desc: "Подвижное смещение сальникового фартука демонстрирует изоляцию воспалительного очага." },
+  },
 };

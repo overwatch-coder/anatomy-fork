@@ -384,4 +384,148 @@ export const histology: Record<OrganId, BilingualHistology> = {
       { name: "Гиподерма", detail: "Жировая ткань с тельцами Пачини; изолирует и смягчает." },
     ],
   },
+  pelvis: {
+    en: [
+      { name: "Cortical bone", detail: "Dense outer layer composed of cylindrical osteons surrounding Haversian canals." },
+      { name: "Trabecular bone", detail: "Internal honeycomb network of bony spicules providing strength with minimal weight." },
+      { name: "Periosteum", detail: "External vascular membrane with outer fibrous and inner osteogenic cellular layers." },
+    ],
+    ru: [
+      { name: "Кортикальная пластинка", detail: "Плотный наружный слой из концентрических остеонов с гаверсовыми каналами." },
+      { name: "Губчатое вещество", detail: "Внутренняя сеть костных трабекул, обеспечивающая прочность при малом весе." },
+      { name: "Надкостница", detail: "Наружная сосудистая оболочка с волокнистым и остеогенным слоями." },
+    ],
+  },
+  knee: {
+    en: [
+      { name: "Articular cartilage", detail: "Avascular hyaline cartilage rich in type II collagen and aggrecan proteoglycans." },
+      { name: "Fibrocartilage meniscus", detail: "Dense extracellular matrix with circumferential collagen bundles absorbing hoop stress." },
+      { name: "Synovial membrane", detail: "Intimal layer of type A macrophage-like and type B synoviocytes producing synovial fluid." },
+    ],
+    ru: [
+      { name: "Суставной хрящ", detail: "Бессосудистый гиалиновый хрящ, богатый коллагеном II типа и протеогликанами." },
+      { name: "Волокнистый мениск", detail: "Плотный матрикс с кольцевыми пучками волокон, поглощающий осевые нагрузки." },
+      { name: "Синовиальная мембрана", detail: "Слой синовиоцитов типов A и B, вырабатывающих синовиальную жидкость." },
+    ],
+  },
+  sternum: {
+    en: [
+      { name: "Compact cortical plates", detail: "Anterior and posterior thin layers of lamellar bone protecting the vascular interior." },
+      { name: "Hematopoietic marrow", detail: "Active red marrow packed with erythroid, myeloid, and megakaryocytic cell lineages." },
+      { name: "Costal articular facets", detail: "Hyaline cartilage linings mediating non-axial gliding with costal cartilages." },
+    ],
+    ru: [
+      { name: "Компактные пластинки", detail: "Передний и задний тонкие слои пластинчатой кости, защищающие костный мозг." },
+      { name: "Кроветворный костный мозг", detail: "Красный костный мозг с миелоидными, эритроидными и тромбоцитарными ростками." },
+    { name: "Реберные суставные вырезки", detail: "Гиалиновые суставные площадки для сочленения с реберными хрящами." },
+    ],
+  },
+  manubrium: {
+    en: [
+      { name: "Dense bone cortex", detail: "Sturdy outer bone casing designed to resist heavy shoulder girdle torque." },
+      { name: "Cancellous core", detail: "Interior trabecular scaffolding housing hematopoietic stem cell niches." },
+      { name: "Fibrocartilage synchondrosis", detail: "Articular disc fibrocartilage mediating the sternoclavicular joint articulation." },
+    ],
+    ru: [
+      { name: "Плотный костный кортекс", detail: "Прочный наружный слой кости, выдерживающий нагрузку плечевого пояса." },
+      { name: "Губчатая сердцевина", detail: "Внутренняя сеть балок, содержащая ниши кроветворных стволовых клеток." },
+      { name: "Суставной волокнистый хрящ", detail: "Хрящевой внутрисуставной диск грудино-ключичного сочленения." },
+    ],
+  },
+  "main-bronchus": {
+    en: [
+      { name: "Respiratory mucosa", detail: "Pseudostratified ciliated columnar epithelium interspersed with mucus goblet cells." },
+      { name: "Hyaline cartilage arches", detail: "Rigid horseshoe-shaped cartilaginous plates maintaining patent airway lumen." },
+      { name: "Bronchial smooth muscle", detail: "Helical bands regulating cross-sectional caliber under autonomic control." },
+    ],
+    ru: [
+      { name: "Дыхательная слизистая", detail: "Многорядный призматический реснитчатый эпителий с бокаловидными клетками." },
+      { name: "Гиалиновые хрящевые дуги", detail: "Жёсткие хрящевые пластины, предотвращающие спадение воздухоносного просвета." },
+      { name: "Гладкая мускулатура", detail: "Пучки мышечных волокон, регулирующие ширину просвета под вегетативным контролем." },
+    ],
+  },
+  "palatine-tonsil": {
+    en: [
+      { name: "Stratified squamous epithelium", detail: "Non-keratinized surface epithelium invaginating deeply to line tonsillar crypts." },
+      { name: "Germinal centers", detail: "Densely cellular lymphoid follicles where activated B-lymphocytes undergo somatic hypermutation." },
+      { name: "Interfollicular T-cell zone", detail: "Paracortical lymphoid tissue hosting antigen-presenting dendritic cells and T-lymphocytes." },
+    ],
+    ru: [
+      { name: "Многослойный плоский эпителий", detail: "Неороговевающий поверхностный эпителий, выстилающий глубокие ветвящиеся крипты." },
+      { name: "Герминативные центры", detail: "Лимфоидные узелки с делящимися B-лимфоцитами, вырабатывающими антитела." },
+      { name: "Межфолликулярная T-зона", detail: "Лимфоидная ткань с дендритными антигенпрезентирующими клетками и T-хелперами." },
+    ],
+  },
+  "fallopian-tube": {
+    en: [
+      { name: "Ciliated columnar cells", detail: "Epithelial cells with apical motile cilia that beat in coordinated waves toward the uterus." },
+      { name: "Secretory peg cells", detail: "Non-ciliated microvillar cells providing nutrient-rich tubal fluid for gametes and embryo." },
+      { name: "Muscularis", detail: "Inner circular and outer longitudinal smooth muscle layers executing peristalsis." },
+    ],
+    ru: [
+      { name: "Реснитчатые клетки", detail: "Эпителиальные клетки с подвижными ресничками, бьющими по направлению к матке." },
+      { name: "Секреторные вставочные клетки", detail: "Безреснитчатые клетки, выделяющие питательную трубную жидкость для эмбриона." },
+      { name: "Мышечная оболочка", detail: "Внутренний циркулярный и наружный продольный слои гладких мышечных клеток." },
+    ],
+  },
+  ureter: {
+    en: [
+      { name: "Transitional urothelium", detail: "Multilayered distensible epithelium with umbrella cells providing an impermeable urine barrier." },
+      { name: "Smooth muscle tunic", detail: "Spiraling layers generating coordinated rhythmic peristaltic contractions." },
+      { name: "Adventitia", detail: "Fibroelastic connective tissue casing holding neurovascular supplies." },
+    ],
+    ru: [
+      { name: "Переходный эпителий (уротелий)", detail: "Многослойный растяжимый эпителий с зонтичными клетками, непроницаемый для мочи." },
+      { name: "Мышечная оболочка", detail: "Спирально ориентированные пучки миоцитов, создающие перистальтические волны." },
+      { name: "Адвентиция", detail: "Рыхлая волокнистая соединительная ткань с кровеносными сосудами и нервами." },
+    ],
+  },
+  urethra: {
+    en: [
+      { name: "Urothelial to squamous lining", detail: "Transitional urothelium proximally transitioning to stratified squamous near the meatus." },
+      { name: "Lamina propria vascular plexus", detail: "Rich cavernous venous spaces that engorge to assist mechanical continence." },
+      { name: "Sphincter musculature", detail: "Inner involuntary smooth muscle and outer striated voluntary sphincter fibers." },
+    ],
+    ru: [
+      { name: "Эпителиальная выстилка", detail: "Переходный эпителий у шейки пузыря, сменяющийся многослойным плоским у выхода." },
+      { name: "Сосудистое сплетение пластинки", detail: "Обильная венозная сеть, помогающая герметичному закрытию просвета канала." },
+      { name: "Сфинктерный аппарат", detail: "Внутренний гладкомышечный и наружный поперечнополосатый произвольный сфинктеры." },
+    ],
+  },
+  "renal-pelvis": {
+    en: [
+      { name: "Transitional urothelium", detail: "Stratified impermeable epithelial blanket shielding renal parenchyma from hypertonic urine." },
+      { name: "Lamina propria", detail: "Dense fibroelastic connective layer rich in elastic fibers and capillaries." },
+      { name: "Muscularis layer", detail: "Loosely arranged smooth muscle fibers acting as intrinsic rhythmic peristaltic pacemakers." },
+    ],
+    ru: [
+      { name: "Переходный эпителий (уротелий)", detail: "Многослойный непроницаемый барьер, защищающий почку от гипертоничной мочи." },
+      { name: "Собственная пластинка", detail: "Плотная соединительнотканная пластинка с эластическими волокнами и капиллярами." },
+      { name: "Гладкомышечный слой", detail: "Слои миоцитов с пейсмекерной активностью, генерирующие ритм перистальтики." },
+    ],
+  },
+  "large-intestine": {
+    en: [
+      { name: "Colon mucosa with crypts", detail: "Simple columnar epithelium with deep crypts of Lieberkühn and abundant goblet cells." },
+      { name: "Submucosa", detail: "Vascular collagenous layer hosting Meissner's autonomic nerve plexus and lymphoid nodules." },
+      { name: "Muscularis externa and teniae", detail: "Inner circular smooth muscle and outer longitudinal muscle organized into 3 teniae coli." },
+    ],
+    ru: [
+      { name: "Слизистая с криптами", detail: "Однослойный призматический эпителий с глубокими криптами и множеством бокаловидных клеток." },
+      { name: "Подслизистая основа", detail: "Соединительнотканный слой с кровеносными сосудами и подслизистым нервным сплетением." },
+      { name: "Мышечная оболочка и тении", detail: "Циркулярный мышечный слой и три наружные продольные мышечные ленты (teniae coli)." },
+    ],
+  },
+  omentum: {
+    en: [
+      { name: "Peritoneal mesothelium", detail: "Simple squamous mesothelial cell sheets covering anterior and posterior surfaces." },
+      { name: "Adipose connective stroma", detail: "Vascularized lobules of mature adipocytes providing cushioning and insulation." },
+      { name: "Milky spots (taches laiteuses)", detail: "Dense submesothelial macrophage and lymphocyte aggregates filtering peritoneal fluid." },
+    ],
+    ru: [
+      { name: "Брюшинный мезотелий", detail: "Листки однослойного плоского мезотелия, покрывающие обе поверхности сальника." },
+      { name: "Жировая строма", detail: "Дольки зрелой жировой ткани с капиллярной сетью, обеспечивающие амортизацию." },
+      { name: "Млечные пятна (пятна Ранвье)", detail: "Скопления макрофагов и лимфоцитов, осуществляющие иммунную защиту брюшины." },
+    ],
+  },
 };

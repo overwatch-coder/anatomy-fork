@@ -886,4 +886,484 @@ export const lessonsExtra: Partial<Record<OrganId, BilingualLesson>> = {
       ],
     },
   },
+  pelvis: {
+    en: {
+      objectives: [
+        "Describe the bones and joints that constitute the human pelvic girdle",
+        "Explain sexual dimorphism between the male and female pelvis",
+        "Outline common clinical fractures and stability considerations",
+      ],
+      structure:
+        "The pelvis is a closed basin-shaped ring formed by the two hip bones (ossa coxae) anteriorly and laterally, and the sacrum and coccyx posteriorly. Each hip bone consists of the fused ilium, ischium, and pubis meeting at the cup-shaped acetabulum. The pelvic brim divides the cavity into the false (greater) pelvis supporting lower abdominal organs and the true (lesser) pelvis enclosing reproductive, urinary, and rectal structures. The sacroiliac joints transfer body weight from spine to femur, anchored by immense sacrotuberous and sacrospinous ligaments.",
+      function:
+        "The pelvic girdle serves as the mechanical bridge between the axial skeleton and the lower extremities. It bears and distributes the weight of the head, arms, and torso during standing and gait. Furthermore, its rigid skeletal architecture encloses and shields delicate pelvic viscera—including the bladder, internal reproductive organs, and rectosigmoid—while providing broad muscular origins for core stabilizers, gluteals, and thigh adductors.",
+      clinical: [
+        "High-energy pelvic ring fractures ('open book') can disrupt the presacral venous plexus, causing severe internal hemorrhage.",
+        "Pelvic organ prolapse occurs when weakened pelvic floor muscles allow bladder, uterus, or rectum to descend.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Moore K.L., Dalley A.F., Agur A.M. Clinically Oriented Anatomy. 8th ed. Wolters Kluwer, 2018.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать кости и сочленения, формирующие тазовый пояс человека",
+        "Объяснить половые различия строения мужского и женского таза",
+        "Перечислить клинические особенности переломов костей таза",
+      ],
+      structure:
+        "Таз представляет собой замкнутое костное кольцо, образованное двумя тазовыми костями спереди и по бокам, а также крестцом и копчиком сзади. Каждая тазовая кость образуется слиянием подвздошной, седалищной и лобковой костей в области вертлужной впадины. Пограничная линия делит таз на большой таз, поддерживающий органы брюшной полости, и малый таз, вмещающий мочевой пузырь, прямую кишку и внутренние половые органы. Крестцово-подвздошные суставы фиксируются мощными крестцово-бугорными и крестцово-остистыми связками.",
+      function:
+        "Тазовый пояс выполняет роль опорного моста между осевым скелетом и свободными нижними конечностями. Он воспринимает и перераспределяет тяжесть верхней половины туловища при стоянии и ходьбе. Костные стенки таза защищают жизненно важные тазовые органы и кровеносные сосуды, а наружные поверхности служат местом прикрепления мощных ягодичных мышц и мышц брюшного пресса.",
+      clinical: [
+        "Тяжёлые переломы тазового кольца сопровождаются повреждением венозных сплетений и массивным внутренним кровотечением.",
+        "Ослабление мышц диафрагмы таза приводит к опущению и выпадению матки, влагалища и мочевого пузыря.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Сапин М.Р. Анатомия человека. В 2-х томах. — М.: ГЭОТАР-Медиа, 2020.",
+      ],
+    },
+  },
+  knee: {
+    en: {
+      objectives: [
+        "Describe the articulating bones, menisci, and capsule of the knee joint",
+        "Explain the stabilizer roles of the cruciate and collateral ligaments",
+        "Recognize common sports injuries and degenerative osteoarthritis of the knee",
+      ],
+      structure:
+        "The knee joint is a complex modified hinge joint combining the femorotibial and femoropatellar articulations. The femoral condyles articulate with the shallow tibial plateaus, mediated by the medial (C-shaped) and lateral (O-shaped) fibrocartilaginous menisci. Major stabilizers include the anterior cruciate ligament (preventing anterior tibial translation), posterior cruciate ligament (preventing posterior translation), medial and lateral collateral ligaments (preventing valgus/varus displacement), and the extensor mechanism of the patellar tendon.",
+      function:
+        "The knee enables flexion and extension with subtle internal and external rotation ('screw-home mechanism') that locks the knee into full extension for energy-efficient standing. The menisci distribute compressive loads over a broader contact area and absorb peak shock during running, jumping, and stair navigation. Synovial fluid within the extensive joint cavity lubricates articular hyaline cartilage surfaces and provides nutrition to avascular tissues.",
+      clinical: [
+        "ACL ruptures typically occur during sudden deceleration, twisting, or hyperextension, often requiring surgical reconstruction.",
+        "Knee osteoarthritis involves progressive loss of articular cartilage, leading to pain, osteophyte formation, and joint space narrowing.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Netter F.H. Atlas of Human Anatomy. 7th ed. Elsevier, 2018.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать сочленяющиеся кости, мениски и капсулу коленного сустава",
+        "Объяснить стабилизирующую роль крестообразных и боковых связок",
+        "Рассмотреть распространённые спортивные травмы и артроз колена",
+      ],
+      structure:
+        "Коленный сустав — сложный мыщелковый сустав, включающий сочленения бедренной, большеберцовой кости и надколенника. Округлые мыщелки бедра опираются на уплощённые суставные площадки голени через серповидные волокнисто-хрящевые мениски. Внутрисуставную стабильность обеспечивают передняя и задняя крестообразные связки, а наружную — большеберцовая и малоберцовая коллатеральные связки, укреплённые сухожилием четырёхглавой мышцы бедра.",
+      function:
+        "Сустав обеспечивает сгибание и разгибание голени, а также небольшую ротацию при согнутом колене. Механизм автоматической ротации («запирания») стабилизирует ногу в выпрямленном положении при стоянии без мышечного перенапряжения. Мениски поглощают ударные нагрузки при беге и прыжках, а синовиальная жидкость смазывает гиалиновый хрящ и питает его бессосудистые слои.",
+      clinical: [
+        "Разрыв передней крестообразной связки возникает при резком скручивании согнутой ноги и часто требует артроскопической пластики.",
+        "Гонартроз — дегенеративное разрушение суставного хряща с формированием остеофитов и ограничением движений.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Сапин М.Р. Анатомия человека. В 2-х томах. — М.: ГЭОТАР-Медиа, 2020.",
+      ],
+    },
+  },
+  sternum: {
+    en: {
+      objectives: [
+        "Identify the three anatomical segments of the sternum and their junctions",
+        "Explain the thoracic cage attachments of true ribs and clavicles",
+        "Detail clinical considerations including median sternotomy and pectus deformities",
+      ],
+      structure:
+        "The sternum is a flat, elongated bone in the anterior midline of the thorax (~17 cm long in adults). It consists of three fused segments: the broad superior manubrium, the elongated gladiolus (body), and the small inferior cartilaginous xiphoid process. The junction between manubrium and body forms a prominent transverse ridge—the sternal angle (angle of Louis)—which aligns with the second costal cartilages. Lateral margins exhibit costal notches that receive the cartilages of the first seven ribs.",
+      function:
+        "The sternum anchors the anterior thoracic cage, completing the protective ribcage shield guarding the heart, ascending aorta, and lungs. Movements of the ribs at sternocostal joints expand and compress thoracic volume during ventilation (the 'pump-handle' movement). Moreover, the internal cancellous spongy bone houses active red hematopoietic marrow throughout life, actively generating erythrocytes and leukocytes.",
+      clinical: [
+        "Median sternotomy splitting the sternum longitudinally is the principal surgical pathway to access the heart and mediastinum.",
+        "Pectus excavatum (sunken chest) is a congenital anomaly where the sternum depresses posteriorly toward the spine.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Drake R.L., Vogl A.W., Mitchell A.W. Gray's Anatomy for Students. 4th ed. Elsevier, 2019.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Выделить три анатомических отдела грудины и места их соединений",
+        "Описать прикрепление рёбер и ключиц к грудной клетке",
+        "Рассмотреть клиническое значение стернотомии и деформаций грудины",
+      ],
+      structure:
+        "Грудина — плоская губчатая кость длиной около 17 см, расположенная по передней срединной линии грудной клетки. Она состоит из трёх отделов: широкой верхней рукоятки, вытянутого тела и нижнего мечевидного отростка. Соединение рукоятки с телом образует угол грудины (угол Луи), служащий ключевым топографическим ориентиром уровня 2-х рёбер. По латеральным краям грудины расположены реберные вырезки для прикрепления хрящей семи пар истинных рёбер.",
+      function:
+        "Грудина замыкает костный каркас грудной клетки спереди, защищая сердце, аорту и лёгкие от механических повреждений. Движения грудины и рёбер по типу «рукоятки насоса» увеличивают переднезадний размер грудной клетки при вдохе. Внутри губчатого вещества грудины всю жизнь сохраняется активный красный костный мозг, осуществляющий гемопоэз.",
+      clinical: [
+        "Срединная продольная стернотомия — базовый доступ в кардиохирургии при операциях аортокоронарного шунтирования.",
+        "Воронкообразная деформация грудной клетки (pectus excavatum) вызывает западение грудины и может смещать сердце.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Сапин М.Р. Анатомия человека. В 2-х томах. — М.: ГЭОТАР-Медиа, 2020.",
+      ],
+    },
+  },
+  manubrium: {
+    en: {
+      objectives: [
+        "Describe the anatomical landmarks and articulations of the manubrium sterni",
+        "Explain relations to the thoracic inlet and retrosternal great vessels",
+        "Recognize clinical conditions affecting sternoclavicular joints",
+      ],
+      structure:
+        "The manubrium is the quadrangular superior segment of the sternum (~5 cm wide). Its superior border features the central concave jugular (suprasternal) notch flanked by paired oval clavicular notches forming the sternoclavicular joints—the sole skeletal articulation linking the upper limb to the axial skeleton. Inferolaterally, it bears facets for the first costal cartilages and contributes to the second rib facet at the manubriosternal synchondrosis (sternal angle).",
+      function:
+        "The manubrium anchors the pectoral girdle to the torso, transmitting physical forces from the arms and shoulder girdle to the axial skeleton. It frames the anterior boundary of the superior thoracic aperture (thoracic inlet). Directly behind its thick bone lies the aortic arch and its three branches, the left brachiocephalic vein, and the thymus, all shielded from blunt anterior trauma.",
+      clinical: [
+        "Posterior dislocation of the sternoclavicular joint is a medical emergency that can compress the trachea, esophagus, and subclavian vessels.",
+        "Manubriosternal joint arthritis causes localized chest wall tenderness mimicking cardiac angina pectoris.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Moore K.L., Dalley A.F., Agur A.M. Clinically Oriented Anatomy. 8th ed. Wolters Kluwer, 2018.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать анатомические ориентиры и сочленения рукоятки грудины",
+        "Объяснить её топографическое отношение к сосудам верхнего средостения",
+        "Охарактеризовать заболевания и вывихи грудино-ключичного сочленения",
+      ],
+      structure:
+        "Рукоятка грудины — широкая верхняя четырёхугольная часть грудины шириной около 5 см. На её верхнем крае находится яремная вырезка, по сторонам от которой лежат парные ключичные вырезки, образующие грудино-ключичные суставы — единственные суставы, соединяющие руку с осевым скелетом. Латерально к рукоятке крепятся хрящи первой пары рёбер, а внизу она соединяется с телом грудины через волокнисто-хрящевой синхондроз.",
+      function:
+        "Рукоятка служит прочной опорой для пояса верхних конечностей, передавая мышечные усилия рук на грудную клетку. Она формирует переднюю границу верхней апертуры грудной клетки. Непосредственно позади рукоятки проходят дуга аорты, левая плечеголовная вена и трахея, надёжно укрытые от прямых травматических воздействий.",
+      clinical: [
+        "Задний травматический вывих грудинного конца ключицы опасен сдавлением трахеи и подключичных сосудов.",
+        "Артрит и воспаление рукоятко-грудинного синхондроза вызывают локальную боль в груди, требующую дифференциальной диагностики со стенокардией.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Сапин М.Р. Анатомия человека. В 2-х томах. — М.: ГЭОТАР-Медиа, 2020.",
+      ],
+    },
+  },
+  "main-bronchus": {
+    en: {
+      objectives: [
+        "Trace the bifurcation of the trachea into primary main bronchi",
+        "Contrast the anatomical differences between right and left main bronchi",
+        "Explain bronchial clearance mechanisms and foreign body aspiration",
+      ],
+      structure:
+        "The primary main bronchi arise at the carina of the trachea at the level of the sternal angle (T4–T5). The right main bronchus is wider (~15 mm), shorter (~2.5 cm), and runs more vertically (~25° from midline) before dividing into three lobar bronchi. The left main bronchus is narrower (~12 mm), longer (~5 cm), and branches at an angle of ~45° under the aortic arch to feed two lobar bronchi. Their walls are reinforced by hyaline cartilage arches and lines of ciliated respiratory mucosa.",
+      function:
+        "Main bronchi convey inspired air into the lobar, segmental, and subsegmental ramifications of the bronchial tree. Pseudostratified ciliated columnar epithelium secretes mucus and beats continuously upward ('mucociliary escalator') to propel inhaled particulate debris toward the pharynx for expectoration or swallowing. Smooth muscle within the bronchial wall modulates airway resistance in response to autonomic innervation.",
+      clinical: [
+        "Aspirated foreign objects overwhelmingly enter the right main bronchus due to its wider diameter and steeper vertical path.",
+        "Bronchogenic carcinoma often originates within main or lobar bronchi mucosa, detectable early by flexible bronchoscopy.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "West J.B. Respiratory Physiology: The Essentials. 11th ed. Wolters Kluwer, 2020.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать бифуркацию трахеи на правый и левый главные бронхи",
+        "Объяснить анатомические отличия правого и левого бронхов",
+        "Рассмотреть механизмы очищения дыхательных путей и аспирацию инородных тел",
+      ],
+      structure:
+        "Главные бронхи начинаются на уровне бифуркации трахеи (T4–T5 позвонки). Правый главный бронх шире (около 15 мм), короче (2,5 см) и отходит более вертикально, разделяясь на три долевых бронха. Левый главный бронх уже, длиннее (около 5 см) и отходит положе под дугой аорты к двум долям левого лёгкого. Стенки бронхов укреплены хрящевыми полукольцами из гиалинового хряща и выстланы мерцательным дыхательным эпителием.",
+      function:
+        "Главные бронхи транспортируют вдыхаемый воздух в долевые и сегментарные бронхиальные ветви лёгких. Реснички мерцательного эпителия непрерывно колеблются в направлении гортани («мукоцилиарный клиренс»), удаляя осевшие пылевые частицы и бактерии. Гладкие мышцы стенок регулируют просвет бронхов под действием симпатической и парасимпатической нервной системы.",
+      clinical: [
+        "Инородные тела у детей и взрослых значительно чаще аспирируются в правый главный бронх из-за его вертикального хода.",
+        "Рак лёгкого часто локализуется в эпителии главных и долевых бронхов, требуя бронхоскопической биопсии для верификации диагноза.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Сапин М.Р. Анатомия человека. В 2-х томах. — М.: ГЭОТАР-Медиа, 2020.",
+      ],
+    },
+  },
+  "palatine-tonsil": {
+    en: {
+      objectives: [
+        "Describe the location, borders, and microscopic crypt anatomy of palatine tonsils",
+        "Explain their role in mucosal immune response and antibody production",
+        "Identify clinical indications for tonsillectomy and peritonsillar complications",
+      ],
+      structure:
+        "The palatine tonsils are paired ovoid lymphoid organs situated in the tonsillar fossa of the oropharynx between the palatoglossal and palatopharyngeal arches. Their luminal surface is covered by non-keratinized stratified squamous epithelium invaginating deeply into 10–20 blind branching tonsillar crypts. Beneath the epithelium lies dense lymphatic tissue organized into germinal centers packed with active B- and T-lymphocytes, while the deep surface is insulated by a fibrous capsule.",
+      function:
+        "Positioned at the gateway of the respiratory and alimentary tracts, the tonsils sample swallowed and inspired antigens. Microorganisms trapped in tonsillar crypts are transported by specialized microfold (M) cells to underlying follicles, initiating clonal B-cell proliferation and secretion of pathogen-neutralizing secretory immunoglobulin A (sIgA).",
+      clinical: [
+        "Peritonsillar abscess (Quinsy) is an accumulation of pus between the tonsillar capsule and pharyngeal constrictor muscle causing severe trismus.",
+        "Severe tonsillar hypertrophy in children can obstruct the upper airway, resulting in pediatric obstructive sleep apnea.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Janeway's Immunobiology. 9th ed. Garland Science, 2017.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать топографию, крипты и микроструктуру нёбных миндалин",
+        "Объяснить иммунную роль миндалин в выработке секреторного иммуноглобулина A",
+        "Охарактеризовать ангину, паратонзиллярный абсцесс и показания к тонзиллэктомии",
+      ],
+      structure:
+        "Нёбные миндалины — парные овальные лимфоидные органы, расположенные в миндаликовых ямках ротоглотки между нёбными дужками. Поверхность миндалины покрыта многослойным плоским эпителием, глубоко врастающим внутрь ткани в виде 10–20 ветвящихся крипт. В глубине располагаются многочисленные лимфоидные узелки с центрами размножения B-лимфоцитов, а снаружи орган покрыт соединительнотканной псевдокапсулой.",
+      function:
+        "Миндалины первыми контактируют с патогенами, поступающими с пищей и вдыхаемым воздухом. В криптах происходит захват антигенов дендритными клетками и стимуляция B-лимфоцитов, вырабатывающих секреторные антитела IgA. Миндалины играют ведущую роль в формировании приобретённого иммунитета в детском возрасте.",
+      clinical: [
+        "Паратонзиллярный абсцесс развивается при распространении гнойного процесса за капсулу миндалины, требуя экстренного вскрытия.",
+        "Гипертрофия миндалин и аденоидов у детей вызывает ночное апноэ, храп и нарушение формирования лицевого черепа.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Пальчун В.Т., Магомедов М.М. Оториноларингология. 4-е изд. — М.: ГЭОТАР-Медиа, 2019.",
+      ],
+    },
+  },
+  "fallopian-tube": {
+    en: {
+      objectives: [
+        "Detail the four anatomical segments of the uterine tube and their histology",
+        "Explain ovum capture, capacitation, fertilization, and tubal transport",
+        "Outline the pathogenesis and clinical emergencies of ectopic tubal pregnancy",
+      ],
+      structure:
+        "The fallopian tubes (uterine tubes, ~10–12 cm long) lie along the upper margin of the broad ligament. Anatomically, each tube features four sections: the funnel-shaped infundibulum bordered by mobile fimbriae, the dilated thin-walled ampulla (~half the length), the narrow muscular isthmus, and the intramural (uterine) segment penetrating the myometrium. The mucosal lining features complex longitudinal plicae lined by simple ciliated and non-ciliated secretory peg cells.",
+      function:
+        "At ovulation, fimbriae sweep over the ovary to direct the oocyte into the infundibulum. The ampulla provides the optimal physiological microenvironment for sperm capacitation and fertilization. Ciliary currents and rhythmic contractions of the muscular wall transport the developing blastocyst into the uterine cavity over 3–4 days, while secretory peg cells provide nutrient fluid supporting the early embryo.",
+      clinical: [
+        "Ectopic tubal pregnancy occurs when a blastocyst implants in the ampulla or isthmus, risking catastrophic tubal rupture and hemorrhage.",
+        "Pelvic inflammatory disease (salpingitis) from chlamydia or gonorrhea often produces scarred, blocked tubes causing tubal infertility.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Cunningham F.G. et al. Williams Obstetrics. 26th ed. McGraw Hill, 2022.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать четыре отдела маточной трубы и строение её стенки",
+        "Объяснить захват яйцеклетки, оплодотворение и транспорт зародыша",
+        "Охарактеризовать причины и опасности внематочной беременности",
+      ],
+      structure:
+        "Маточные (фаллопиевы) трубы — парные трубки длиной 10–12 см, расположенные в верхнем крае широкой связки матки. В каждой трубе различают воронку с длинными бахромками (фимбриями), расширенную ампулу (место оплодотворения), узкий перешеек и маточную часть в стенке матки. Слизистая оболочка собрана в ветвящиеся продольные складки и выстлана мерцательным цилиндрическим эпителием с секреторными клетками.",
+      function:
+        "Во время овуляции фимбрии воронки улавливают яйцеклетку из брюшной полости. В ампуле трубы происходит слияние сперматозоида и яйцеклетки. Секреторные клетки выделяют питательную жидкость для ооцита и спермиев, а мерцательные реснички и перистальтика гладких мышц продвигают развивающийся зародыш в полость матки за 3–4 суток.",
+      clinical: [
+        "Трубная беременность — имплантация зародыша в стенку трубы; разрыв трубы сопровождается массивным жизнеугрожающим внутренним кровотечением.",
+        "Хронический сальпингит приводит к слипанию складок и непроходимости маточных труб — частой причине женского бесплодия.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Савельева Г.М. Акушерство и гинекология. — М.: ГЭОТАР-Медиа, 2020.",
+      ],
+    },
+  },
+  ureter: {
+    en: {
+      objectives: [
+        "Trace the retroperitoneal course of the ureter from kidney to bladder",
+        "Explain ureteral peristalsis and the anti-reflux mechanism",
+        "Discuss urolithiasis, renal colic, and hydronephrosis management",
+      ],
+      structure:
+        "The ureters are bilateral retroperitoneal muscular conduits (~25–30 cm long) connecting the renal pelvis to the urinary bladder. Each descends along the anterior surface of the psoas major muscle, crosses the bifurcation of the common iliac vessels at the pelvic brim, and enters the posterolateral base of the bladder. The wall comprises an inner transitional urothelium, an inner longitudinal and outer circular smooth muscle tunic, and an outer adventitial fibroelastic sheath.",
+      function:
+        "Ureters propel urine from the kidneys into the bladder via rhythmic peristaltic contractions initiated by pacemaker cells in the minor calyces. Traveling at 2–3 cm/s, these peristaltic waves pump urine bursts against resting bladder pressures. The oblique passage through the muscular bladder wall compresses the ureter during micturition, functioning as a physiological valve that prevents vesicoureteral reflux.",
+      clinical: [
+        "Ureteral calculi lodged at points of narrowing cause spasmodic smooth muscle contraction and acute excruciating flank pain (renal colic).",
+        "Vesicoureteral reflux (VUR) in children allows contaminated bladder urine to ascend to kidneys, causing recurrent pyelonephritis and scarring.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Wein A.J. et al. Campbell-Walsh-Wein Urology. 12th ed. Elsevier, 2020.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Проследить забрюшинный ход мочеточника от почки до мочевого пузыря",
+        "Объяснить механизм перистальтики и антирефлюксного клапана",
+        "Описать клинику почечной колики при мочекаменной болезни",
+      ],
+      structure:
+        "Мочеточники — парные забрюшинные мышечные трубки длиной 25–30 см, соединяющие лоханку почки с мочевым пузырём. Они спускаются по передней поверхности большой поясничной мышцы, пересекают подвздошные сосуды на входе в таз и косо прободают стенку мочевого пузыря. Стенка состоит из уротелия (переходного эпителия), продольного и циркулярного слоёв гладких мышц и наружной адвентиции.",
+      function:
+        "Мочеточник ритмично проталкивает мочу в мочевой пузырь за счёт перистальтических волн, возникающих каждые 10–30 секунд. Косой интрамуральный ход через детрузор создаёт клапанный механизм: при повышении внутрипузырного давления стенки мочеточника смыкаются, предотвращая обратный заброс мочи в почки.",
+      clinical: [
+        "Обтурация мочеточника камнем вызывает резкий спазм мускулатуры и приступ сильнейшей почечной колики.",
+        "Пузырно-мочеточниковый рефлюкс приводит к забросу инфицированной мочи в почечные лоханки и развитию вторичного пиелонефрита.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Аляев Ю.Г. Урология. Российские клинические рекомендации. — М.: ГЭОТАР-Медиа, 2019.",
+      ],
+    },
+  },
+  urethra: {
+    en: {
+      objectives: [
+        "Contrast the anatomical divisions and lengths of the male and female urethra",
+        "Explain autonomic and somatic control of micturition sphincters",
+        "Outline urethral strictures, catheterization hazards, and infection risks",
+      ],
+      structure:
+        "The urethra is the terminal conduit of the urinary tract. The male urethra (~20 cm) is divided into four regions: pre-prostatic, prostatic (piercing the prostate and receiving ejaculatory ducts), membranous (traversing the deep perineal pouch), and spongy/penile (coursing through the corpus spongiosum). The female urethra is short (~4 cm), running anterior to the vagina to open into the vulval vestibule. Lining transitions from urothelium near the bladder to stratified squamous epithelium at the meatus.",
+      function:
+        "The urethra conveys urine from the bladder to the exterior during micturition. In males, it also acts as the conduit for semen during ejaculation. Continence is maintained by the involuntary smooth muscle internal urethral sphincter at the bladder neck and the voluntary striated external urethral sphincter in the pelvic floor, relaxed coordinately during voiding.",
+      clinical: [
+        "The short female urethra markedly increases the incidence of ascending bacterial cystitis compared to males.",
+        "Urethral stricture disease secondary to trauma or infection causes progressive urinary hesitancy, straining, and retention.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Wein A.J. et al. Campbell-Walsh-Wein Urology. 12th ed. Elsevier, 2020.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Сравнить анатомические отделы и длину мужской и женской уретры",
+        "Объяснить работу внутреннего и наружного сфинктеров мочеиспускания",
+        "Охарактеризовать стриктуры уретры и риски катетеризации",
+      ],
+      structure:
+        "Мочеиспускательный канал — конечный отдел мочевыделительной системы. Мужская уретра (~20 см) имеет 4 отдела: внутристеночный, простатический (через предстательную железу), перепончатый (в мочеполовой диафрагме) и губчатый (в половом члене). Женская уретра прямая и короткая (~4 см), открывается в преддверие влагалища. Слизистая выстлана уротелием в начальном отделе и многослойным плоским эпителием в дистальном.",
+      function:
+        "Уретра выводит мочу наружу при мочеиспускании, а у мужчин также служит каналом для выведения спермы при семяизвержении. Удержание мочи контролируется внутренним непроизвольным сфинктером шейки пузыря и наружным произвольным поперечнополосатым сфинктером промежности, расслабляющимися синхронно при мочеиспускании.",
+      clinical: [
+        "Анатомическая краткость женской уретры способствует быстрому проникновению инфекции в мочевой пузырь (цистит).",
+        "Рубцовые стриктуры уретры после воспалений или травм вызывают затруднение мочеиспускания и хроническую задержку мочи.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Аляев Ю.Г. Урология. Российские клинические рекомендации. — М.: ГЭОТАР-Медиа, 2019.",
+      ],
+    },
+  },
+  "renal-pelvis": {
+    en: {
+      objectives: [
+        "Describe the funnel architecture of the renal pelvis and its calyces",
+        "Explain urine collection and peristaltic bolus initiation",
+        "Detail staghorn calculi, PUJ obstruction, and pyelonephritis",
+      ],
+      structure:
+        "The renal pelvis is the funnel-shaped expansion of the upper end of the ureter residing within the renal sinus. Inside the kidney, 7–14 cup-like minor calyces surround the renal papillae, collecting urine from the medullary collecting ducts. These unite into 2 or 3 major calyces, which converge into the single renal pelvis basin. The pelvis exits the renal hilum posterior to the renal vein and artery and tapers smoothly into the ureter.",
+      function:
+        "The renal pelvis gathers processed urine from all renal pyramids and coordinates its entry into the ureter. Specialized pacemaker cells in the calyces generate intrinsic electrical slow waves, eliciting rhythmic peristaltic contractions that squeeze urine boluses across the pelviureteric junction, preventing back-pressure damage to delicate nephrons.",
+      clinical: [
+        "Pelviureteric junction (PUJ) obstruction leads to progressive hydronephrosis and cortical thinning if uncorrected.",
+        "Staghorn calculi can fill the entire renal pelvis and branching calyces, leading to recurrent sepsis and renal failure.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Brenner & Rector's The Kidney. 11th ed. Elsevier, 2019.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать воронкообразное строение почечной лоханки и её чашечек",
+        "Объяснить сбор мочи и зарождение перистальтических сокращений",
+        "Рассмотреть коралловидные камни, гидронефроз и пиелонефрит",
+      ],
+      structure:
+        "Почечная лоханка — воронкообразное расширение верхнего конца мочеточника в почечной пазухе. В почке 7–14 малых чашечек охватывают почечные сосочки, принимая мочу из сосочковых протоков. Малые чашечки сливаются в 2–3 большие чашечки, которые объединяются в лоханку. Лоханка выходит из ворот почки позади почечной вены и артерии и плавно переходит в мочеточник.",
+      function:
+        "Лоханка собирает вторичную мочу от всех пирамид почки и подаёт её в мочеточник. Пейсмекерные клетки в стенках чашечек генерируют спонтанные импульсы, запускающие ритмическую перистальтику лоханки, благодаря чему моча порциями выбрасывается в мочеточник без повышения давления в паренхиме почки.",
+      clinical: [
+        "Стеноз лоханочно-мочеточникового перехода вызывает гидронефроз с перерастяжением чашечек и атрофией ткани почки.",
+        "Коралловидные камни лоханки повторяют форму чашечно-лоханочной системы, вызывая хроническую инфекцию и почечную недостаточность.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Аляев Ю.Г. Урология. Российские клинические рекомендации. — М.: ГЭОТАР-Медиа, 2019.",
+      ],
+    },
+  },
+  "large-intestine": {
+    en: {
+      objectives: [
+        "Identify the anatomical subdivisions, flexures, and features of the colon",
+        "Explain water absorption, electrolyte balance, and bacterial fermentation",
+        "Discuss diverticulitis, inflammatory bowel disease, and colorectal malignancy",
+      ],
+      structure:
+        "The large intestine (~1.5 m) frames the abdominal cavity. Its regions are the blind caecum with the vermiform appendix, ascending colon, hepatic flexure, transverse colon, splenic flexure, descending colon, sigmoid colon, and rectum ending at the anal canal. Hallmark structural features distinguishing it from small bowel include three longitudinal muscular ribbons (teniae coli), sacculated pouches (haustra), and small peritoneal fat tags (omental appendices).",
+      function:
+        "The large intestine reabsorbs the bulk of remaining water (~1–1.5 L daily) and sodium from fluid chyme, solidifying indigestible residue into feces. A dense commensal microbiome fermenting dietary soluble fibers produces short-chain fatty acids (acetate, propionate, butyrate) that nourish colonocytes, as well as essential micronutrients including vitamin K and biotin.",
+      clinical: [
+        "Colorectal adenocarcinomas arise from pre-malignant adenomatous polyps, making routine colonoscopy screening vital.",
+        "Diverticulitis occurs when small herniated mucosal pouches (diverticula) become inflamed or micro-perforate.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Guyton A.C., Hall J.E. Textbook of Medical Physiology. 14th ed. Elsevier, 2020.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать отделы, изгибы и анатомические маркеры ободочной кишки",
+        "Объяснить всасывание воды, солевой баланс и роль кишечной микробиоты",
+        "Рассмотреть дивертикулит, колит и скрининг колоректального рака",
+      ],
+      structure:
+        "Толстая кишка (~1,5 м) окаймляет брюшную полость. Она включает слепую кишку с аппендиксом, восходящую ободочную, печёночный изгиб, поперечную ободочную, селезёночный изгиб, нисходящую ободочную, сигмовидную и прямую кишку. От тонкой кишки её отличают три продольные мышечные ленты (teniae coli), характерные вздутия стенки (гаустры) и сальниковые отростки с жировой тканью.",
+      function:
+        "Толстая кишка всасывает из химуса остатки воды (до 1,5 л в сутки) и электролиты, формируя плотный кал. Триллионы симбиотических бактерий микробиома сбраживают непереваренные пищевые волокна, синтезируя короткоцепочечные жирные кислоты (масляную, пропионовую), питающие эпителий, а также витамины K и группы B.",
+      clinical: [
+        "Колоректальный рак развивается из аденоматозных полипов; своевременная скрининговая колоноскопия снижает смертность.",
+        "Дивертикулит возникает при воспалении выпячиваний стенки кишки (дивертикулов), угрожая перфорацией и перитонитом.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Ивашкин В.Т. Гастроэнтерология. Национальное руководство. — М.: ГЭОТАР-Медиа, 2020.",
+      ],
+    },
+  },
+  omentum: {
+    en: {
+      objectives: [
+        "Describe the peritoneal reflections forming the greater and lesser omenta",
+        "Explain the immunologic and mechanical protective functions of the omentum",
+        "Outline omental torsion, metastatic cake formation, and surgical uses",
+      ],
+      structure:
+        "The greater omentum is a prominent quadruple-layered apron of visceral peritoneum. It suspends downward from the greater curvature of the stomach and first part of the duodenum, drapes over the transverse colon and small bowel loops, and loops back upon itself to blend with the transverse mesocolon. Microscopically, it is rich in adipose tissue, delicate fenestrated capillary beds, and dense leukocyte aggregates termed milky spots (taches laiteuses).",
+      function:
+        "Widely known as the 'abdominal policeman', the greater omentum possesses remarkable plastic mobility. It migrates toward zones of peritoneal injury, inflammation, or perforation, adhering firmly with fibrin exudate to wall off abscesses and prevent generalized peritonitis. Milky spots filter peritoneal fluid, scavenging bacteria and coordinating macrophage-mediated immune defenses.",
+      clinical: [
+        "In advanced ovarian and gastrointestinal cancers, malignant cells preferentially seed the omentum to form a dense 'omental cake'.",
+        "Surgeons frequently mobilize vascularized omental flaps (omental patch/Graham patch) to seal perforated peptic ulcers.",
+      ],
+      sources: [
+        "Standring S. Gray's Anatomy. 42nd ed. Elsevier, 2020.",
+        "Skandalakis J.E. Surgical Anatomy. McGraw-Hill, 2004.",
+      ],
+    },
+    ru: {
+      objectives: [
+        "Описать листки брюшины, образующие большой и малый сальники",
+        "Объяснить иммунную и барьерную функцию «брюшного полицейского»",
+        "Рассмотреть метастатический «сальниковый пирог» и пластику сальником в хирургии",
+      ],
+      structure:
+        "Большой сальник — четырёхслойная складка висцеральной брюшины в виде свисающего фартука. Он начинается от большой кривизны желудка, спускается над петлями тонкой кишки и заворачивается кверху, срастаясь с брыжейкой поперечной ободочной кишки. Внутри сальника залегает жировая ткань, кровеносные капилляры и специализированные скопления иммунных клеток — «млечные пятна» (пятна Ранвье).",
+      function:
+        "Сальник называют «жандармом брюшной полости» за его способность перемещаться к очагам воспаления (при аппендиците, холецистите, прободной язве) и отграничивать инфекцию фибриновыми спайками. Млечные пятна фильтруют перитонеальную жидкость, фагоцитируют бактерии и запускают антибактериальный ответ макрофагов.",
+      clinical: [
+        "При раке яичников и желудка метастазы оседают в сальнике, формируя плотный опухолевый конгломерат («сальниковый пирог»).",
+        "Оментизация (пластика лоскутом сальника по Оппелю–Поликарпову) применяется хирургами для закрытия прободных язв желудка.",
+      ],
+      sources: [
+        "Синельников Р.Д. Атлас анатомии человека. 8-е изд. — М.: Новая волна, 2021.",
+        "Савельев В.С. Руководство по неотложной хирургии органов брюшной полости. — М.: Триада-Х, 2017.",
+      ],
+    },
+  },
 };

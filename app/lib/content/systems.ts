@@ -60,7 +60,7 @@ export const bodySystems: BilingualSystem[] = [
   },
   {
     id: "respiratory",
-    organIds: ["lungs", "trachea", "larynx"],
+    organIds: ["lungs", "trachea", "larynx", "main-bronchus"],
     en: {
       name: "Respiratory system",
       description:
@@ -94,7 +94,7 @@ export const bodySystems: BilingualSystem[] = [
   },
   {
     id: "digestive",
-    organIds: ["liver", "intestine", "pancreas", "stomach", "gallbladder", "esophagus", "tongue"],
+    organIds: ["liver", "intestine", "pancreas", "stomach", "gallbladder", "esophagus", "tongue", "large-intestine", "omentum"],
     en: {
       name: "Digestive system",
       description:
@@ -196,7 +196,7 @@ export const bodySystems: BilingualSystem[] = [
   },
   {
     id: "urinary",
-    organIds: ["kidneys", "bladder"],
+    organIds: ["kidneys", "bladder", "ureter", "urethra", "renal-pelvis"],
     en: {
       name: "Urinary system",
       description:
@@ -332,7 +332,7 @@ export const bodySystems: BilingualSystem[] = [
   },
   {
     id: "lymphatic",
-    organIds: ["spleen", "thymus", "lymph-node"],
+    organIds: ["spleen", "thymus", "lymph-node", "palatine-tonsil"],
     en: {
       name: "Lymphatic & immune system",
       description:
@@ -366,7 +366,7 @@ export const bodySystems: BilingualSystem[] = [
   },
   {
     id: "reproductive",
-    organIds: ["uterus", "ovary", "testis", "prostate"],
+    organIds: ["uterus", "ovary", "testis", "prostate", "fallopian-tube"],
     en: {
       name: "Reproductive system",
       description:
@@ -400,7 +400,7 @@ export const bodySystems: BilingualSystem[] = [
   },
   {
     id: "skeletal",
-    organIds: ["femur"],
+    organIds: ["femur", "pelvis", "knee", "sternum", "manubrium"],
     en: {
       name: "Skeletal system",
       description:
@@ -473,4 +473,16 @@ export const systemForOrgan: Record<OrganId, string> = {
   diaphragm: "musculoskeletal",
   biceps: "musculoskeletal",
   femur: "skeletal",
+  pelvis: "skeletal",
+  knee: "skeletal",
+  sternum: "skeletal",
+  manubrium: "skeletal",
+  "main-bronchus": "respiratory",
+  "palatine-tonsil": "lymphatic",
+  "fallopian-tube": "reproductive",
+  ureter: "urinary",
+  urethra: "urinary",
+  "renal-pelvis": "urinary",
+  "large-intestine": "digestive",
+  omentum: "digestive",
 };
